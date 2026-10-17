@@ -46,31 +46,30 @@ export default function ShowcaseModal({ item, index, onClose }) {
       role="dialog"
       aria-modal="true"
     >
-      {/* Top Navbar Sticky con tasto Back ultra-cliccabile */}
-      <div className="sticky top-0 z-[150] border-b border-white/5 bg-[#05080F]/90 p-4 backdrop-blur-xl md:px-8">
-        <button
-          type="button"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            onClose();
-          }}
-          className="group relative z-50 flex cursor-pointer items-center gap-3 text-slate-400 transition-colors hover:text-white"
-        >
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/5 transition-colors group-hover:bg-white/10">
-            <ArrowLeft size={20} className="transition-transform group-hover:-translate-x-1" />
-          </div>
-          <span className="hud-mono text-xs tracking-[0.2em] font-bold uppercase">Back to Gallery</span>
-        </button>
-      </div>
+      {/* TASTO BACK GALLEGGIANTE - INFALLIBILE (z-index 9999) */}
+      <button
+        type="button"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onClose();
+        }}
+        className="fixed left-4 top-4 z-[9999] flex cursor-pointer items-center gap-2 rounded-full border border-white/10 bg-black/60 px-5 py-2.5 text-white shadow-2xl backdrop-blur-md transition-all hover:scale-105 hover:bg-white/10 md:left-8 md:top-8"
+      >
+        <ArrowLeft size={18} />
+        <span className="hud-mono text-xs font-bold uppercase tracking-[0.2em] mt-0.5">
+          Back
+        </span>
+      </button>
 
-      {/* Contenuto principale della pagina */}
-      <div className="mx-auto w-full max-w-6xl p-4 sm:p-8 md:p-12">
+      {/* Contenuto principale della pagina (con padding top maggiorato per non coprire il titolo) */}
+      <div className="mx-auto w-full max-w-6xl p-4 pt-24 sm:p-8 sm:pt-28 md:p-12 md:pt-32">
+        
         {/* Header Progetto */}
         <div className="mb-12">
-          <div className="flex flex-wrap items-center gap-4 mb-6">
+          <div className="mb-6 flex flex-wrap items-center gap-4">
             <span
-              className="chip text-sm px-4 py-1.5"
+              className="chip px-4 py-1.5 text-sm"
               style={{
                 borderColor: "rgba(var(--c-accent-rgb), 0.5)",
                 color: "var(--c-accent)",
@@ -93,7 +92,7 @@ export default function ShowcaseModal({ item, index, onClose }) {
           {item.tags && item.tags.length > 0 && (
             <div className="mt-8 flex flex-wrap gap-3">
               {item.tags.map((t) => (
-                <span key={t} className="tag-mini text-sm px-3 py-1.5">
+                <span key={t} className="tag-mini px-3 py-1.5 text-sm">
                   {t}
                 </span>
               ))}
@@ -104,14 +103,14 @@ export default function ShowcaseModal({ item, index, onClose }) {
         {/* Immagine di Copertina Grande */}
         <div className="relative mb-16 h-64 w-full overflow-hidden rounded-2xl md:h-[500px]">
           <Placeholder item={item} index={index} large />
-          <div className="absolute inset-0 border rounded-2xl border-white/10" />
+          <div className="absolute inset-0 rounded-2xl border border-white/10" />
         </div>
 
         {/* Galleria Immagini */}
         <div className="mb-20">
-          <div className="mb-8 flex items-center gap-3 text-white border-b border-white/5 pb-4">
+          <div className="mb-8 flex items-center gap-3 border-b border-white/5 pb-4 text-white">
             <Images size={24} style={{ color: "var(--c-primary)" }} />
-            <h2 className="hud-mono text-sm font-bold tracking-[0.25em] uppercase text-slate-200">
+            <h2 className="hud-mono text-sm font-bold uppercase tracking-[0.25em] text-slate-200">
               Project Assets / ({galleryImages.length})
             </h2>
           </div>
@@ -137,7 +136,7 @@ export default function ShowcaseModal({ item, index, onClose }) {
                     onError={(e) => {
                       e.currentTarget.style.display = "none";
                       e.currentTarget.parentElement.classList.add(
-                        "flex", "items-center", "justify-center", "min-h-[300px]", "text-sm", "text-slate-500", "font-mono"
+                        "flex", "items-center", "justify-center", "min-h-[300px]", "text-sm", "font-mono", "text-slate-500"
                       );
                       e.currentTarget.parentElement.innerText = `[ IMAGE MISSING: ASSET_${i + 1} ]`;
                     }}
