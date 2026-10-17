@@ -1,17 +1,17 @@
-export const SHOWCASE_FILTERS = ["All", "Ciccio Tag", "Sci-Fi HUD", "Clean Minimal", "RPG Inventory", "Tactical"];
+export const SHOWCASE_FILTERS = ["All", "Studs Style",];
 
 export const SHOWCASE_ITEMS = [
   {
     id: "nebula-main-menu",
-    title: "Ciccio Figo Menu",
-    category: "Ciccio Tag",
+    title: "Key RNG Comms",
+    category: "Studs Style",
     image: "/images/logo.png",
-    blurb: "Full lobby shell with animated backdrop, clear action hierarchy and a game-mode carousel built for thumb reach.",
+    blurb: "All the Frames And Buttons i made for Key RNG Game.",
     specs: "16:9 4K-ready layout · safe-area margins · animated gradient panels · 48px+ touch targets · day/night variants",
     figma: "Auto-layout component library · 240+ variants · color, type & spacing tokens · smart-animate prototype",
     studio: "Component tree mapped to Roact · TweenService motion spec · 9-slice asset sheet · UIAspectRatio constraints",
     features: ["Animated lobby backdrop", "Primary action hierarchy", "Game-mode carousel", "Controller navigation map", "Mobile-safe hit targets"],
-    tags: ["Ciccio", "CAP", "UI Animations", "Vector Artwork"],
+    tags: ["Studs","Clean",],
     spanMd: "md:col-span-2",
     spanLg: "lg:col-span-7",
     height: "h-[320px] md:h-[440px]",
