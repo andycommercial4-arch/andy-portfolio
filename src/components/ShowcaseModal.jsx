@@ -4,7 +4,7 @@ import { ArrowLeft, Images } from "lucide-react";
 import Placeholder from "./Placeholder";
 
 export default function ShowcaseModal({ item, index, onClose }) {
-  // Blocco scroll nativo: sicuro e non rompe la rotellina!
+  // Blocco scroll nativo
   useEffect(() => {
     const originalStyle = window.getComputedStyle(document.body).overflow;
     document.body.style.overflow = "hidden";
@@ -48,28 +48,35 @@ export default function ShowcaseModal({ item, index, onClose }) {
       {/* Area scrollabile indipendente */}
       <div className="absolute inset-0 h-full w-full overflow-y-auto overflow-x-hidden scroll-smooth pb-32">
         
-        {/* TASTO BACK ABBASSATO (top-24 / md:top-28) PER NON TOCCARE IL TUO FRAME IN ALTO! */}
-        <button
-          type="button"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            onClose();
-          }}
-          className="fixed left-4 top-24 z-[999999] flex cursor-pointer items-center gap-2 rounded-full border border-white/20 bg-black/80 px-4 py-2.5 text-white shadow-2xl backdrop-blur-xl transition-all hover:scale-105 hover:bg-white/10 md:left-8 md:top-28"
-        >
-          <ArrowLeft size={20} />
-          <span className="hud-mono mt-0.5 text-xs font-bold uppercase tracking-[0.2em]">
-            Back
-          </span>
-        </button>
-
-        {/* CONTENUTO DELLA PAGINA (Aumentato il pt- per spingere tutto più in basso) */}
-        <div className="mx-auto w-full max-w-6xl px-4 pt-40 sm:px-8 sm:pt-48 md:px-12 md:pt-48">
+        {/* CONTENUTO DELLA PAGINA (Padding top regolato per stare perfettamente sotto la tua Navbar) */}
+        <div className="mx-auto w-full max-w-6xl px-4 pt-28 sm:px-8 sm:pt-32 md:px-12 md:pt-36">
           
-          {/* Header Progetto */}
+          {/* Header Progetto (Qui ora c'è il tasto BACK allineato con STUDS STYLE!) */}
           <div className="mb-12">
-            <div className="mb-6 flex flex-wrap items-center gap-4">
+            <div className="mb-6 flex flex-wrap items-center gap-3 md:gap-5">
+              
+              {/* TASTO BACK INLINE */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onClose();
+                }}
+                className="group flex cursor-pointer items-center gap-2 text-slate-400 transition-colors hover:text-white"
+              >
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 transition-colors group-hover:bg-white/10">
+                  <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-1" />
+                </div>
+                <span className="hud-mono mt-0.5 text-xs font-bold uppercase tracking-[0.2em]">
+                  Back
+                </span>
+              </button>
+
+              {/* Divisore estetico */}
+              <div className="hidden h-4 w-[1px] bg-white/10 sm:block"></div>
+
+              {/* Categoria (es. STUDS STYLE) */}
               <span
                 className="chip px-4 py-1.5 text-sm"
                 style={{
@@ -79,6 +86,8 @@ export default function ShowcaseModal({ item, index, onClose }) {
               >
                 {item.category}
               </span>
+
+              {/* Project ID */}
               <span className="hud-mono text-[12px] tracking-[0.3em] text-slate-500">
                 PROJECT_{String(index + 1).padStart(2, "0")}
               </span>
