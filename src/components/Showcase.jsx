@@ -16,7 +16,10 @@ export default function Showcase() {
   const [filter, setFilter] = useState("All");
   const [active, setActive] = useState(null);
 
-  const items = filter === "All" ? SHOWCASE_ITEMS : SHOWCASE_ITEMS.filter((i) => i.category === filter);
+  const items =
+    filter === "All"
+      ? SHOWCASE_ITEMS
+      : SHOWCASE_ITEMS.filter((i) => i.category === filter);
 
   return (
     <section id="showcase" className="section-pad relative" data-testid="showcase-section">
@@ -74,7 +77,15 @@ export default function Showcase() {
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#080C14] via-[#080C14]/20 to-transparent" />
                 <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-5 md:p-6">
                   <div>
-                    <span className="chip mb-2.5 inline-flex" style={{ borderColor: "rgba(var(--c-accent-rgb), 0.5)", color: "var(--c-accent)" }}>{item.category}</span>
+                    <span
+                      className="chip mb-2.5 inline-flex"
+                      style={{
+                        borderColor: "rgba(var(--c-accent-rgb), 0.5)",
+                        color: "var(--c-accent)",
+                      }}
+                    >
+                      {item.category}
+                    </span>
                     <h3 className="font-display text-lg font-bold text-white sm:text-xl">{item.title}</h3>
                     <div className="mt-2.5 flex flex-wrap gap-1.5">
                       {item.tags.slice(0, 3).map((t) => (
