@@ -31,7 +31,7 @@ export default function Contact() {
                 Let&apos;s build your next <span className="text-grad">interface</span>
               </h2>
               <p className="mx-auto mt-5 max-w-md text-sm leading-relaxed text-slate-400 sm:text-base">
-                Have a game that needs a clean, high-performance UI? Reach out — Discord is the fastest way.
+                Have a game that needs a clean, high-performance UI? Reach out — Discord is the fastest way  TIME ZONE: UTC+2.
               </p>
 
               <div className="mt-9 flex flex-col items-center justify-center gap-4 sm:flex-row">
