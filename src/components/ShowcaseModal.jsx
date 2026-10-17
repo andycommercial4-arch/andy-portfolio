@@ -18,10 +18,26 @@ export default function ShowcaseModal({ item, index, onClose }) {
   }, [onClose]);
 
   const galleryImages = item.gallery || [];
+  const gallerySize = item.gallerySize || "medium";
+
+  // Configurazione dinamica in base alla taglia scelta
+  let gridClass = "";
+  let imageClass = "";
+
+  if (gallerySize === "small") {
+    gridClass = "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4";
+    imageClass = "aspect-square object-cover";
+  } else if (gallerySize === "medium") {
+    gridClass = "grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6";
+    imageClass = "aspect-video object-cover";
+  } else if (gallerySize === "large") {
+    gridClass = "grid-cols-1 gap-6";
+    imageClass = "h-auto w-full object-contain"; // Mostra tutto il frame senza tagliarlo
+  }
 
   return (
     <motion.div
-      className="modal-backdrop"
+      className="modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -30,7 +46,7 @@ export default function ShowcaseModal({ item, index, onClose }) {
       data-testid="showcase-modal-backdrop"
     >
       <motion.div
-        className="modal-panel max-w-4xl"
+        className="modal-panel relative flex w-full max-w-4xl flex-col overflow-hidden rounded-2xl bg-[#080C14] shadow-2xl ring-1 ring-white/10"
         initial={{ opacity: 0, y: 40, scale: 0.96 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 30, scale: 0.97 }}
@@ -42,11 +58,11 @@ export default function ShowcaseModal({ item, index, onClose }) {
         data-testid="showcase-modal"
       >
         {/* Cover superiore */}
-        <div className="relative h-56 overflow-hidden md:h-72">
+        <div className="relative h-48 shrink-0 overflow-hidden md:h-64">
           <Placeholder item={item} index={index} large />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0A0F1A] via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#080C14] via-transparent to-transparent" />
           <button
-            className="modal-close"
+            className="absolute right-4 top-4 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-md transition-colors hover:bg-white/20"
             onClick={onClose}
             aria-label="Close details"
             data-testid="showcase-modal-close"
@@ -55,8 +71,8 @@ export default function ShowcaseModal({ item, index, onClose }) {
           </button>
         </div>
 
-        {/* Contenuto Modale */}
-        <div className="max-h-[55vh] overflow-y-auto p-6 sm:p-8 md:max-h-[62vh]">
+        {/* Contenuto Modale (SCROLL FIXATO QUI - max-h aumentata, overscroll-contain aggiunto) */}
+        <div className="relative max-h-[65vh] overflow-y-auto overscroll-contain p-6 sm:p-8">
           {/* Categoria e Tag ID */}
           <div className="flex flex-wrap items-center gap-3">
             <span
@@ -81,9 +97,9 @@ export default function ShowcaseModal({ item, index, onClose }) {
             {item.blurb}
           </p>
 
-          {/* Sezione Cubi / Pacchetto Immagini */}
+          {/* Sezione Dinamica Immagini */}
           <div className="mt-8">
-            <div className="mb-4 flex items-center gap-2 text-white">
+            <div className="mb-5 flex items-center gap-2 text-white">
               <Images size={16} style={{ color: "var(--c-primary)" }} />
               <h4 className="hud-mono text-[11px] font-semibold tracking-[0.22em] uppercase text-slate-300">
                 Package Assets ({galleryImages.length})
@@ -91,27 +107,27 @@ export default function ShowcaseModal({ item, index, onClose }) {
             </div>
 
             {galleryImages.length > 0 ? (
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 sm:gap-4">
+              <div className={`grid ${gridClass}`}>
                 {galleryImages.map((imgSrc, i) => (
                   <motion.div
                     key={i}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.08 + i * 0.04 }}
-                    className="group relative aspect-square overflow-hidden rounded-xl border border-white/10 bg-slate-900/60 shadow-inner"
+                    className="group relative overflow-hidden rounded-xl border border-white/5 bg-[#0D131F] shadow-inner"
                   >
                     <img
                       src={imgSrc}
                       alt={`${item.title} asset ${i + 1}`}
-                      className="h-full w-full object-cover transition-transform duration-300 ease-out group-hover:scale-108"
+                      className={`w-full transition-transform duration-500 ease-out group-hover:scale-[1.02] ${imageClass}`}
                       loading="lazy"
                       onError={(e) => {
-                        // Fallback visivo se l'immagine non è ancora presente
                         e.currentTarget.style.display = "none";
                         e.currentTarget.parentElement.classList.add(
                           "flex",
                           "items-center",
                           "justify-center",
+                          "min-h-[150px]",
                           "text-xs",
                           "text-slate-500",
                           "font-mono"
@@ -119,7 +135,7 @@ export default function ShowcaseModal({ item, index, onClose }) {
                         e.currentTarget.parentElement.innerText = `ASSET_${i + 1}`;
                       }}
                     />
-                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                   </motion.div>
                 ))}
               </div>
@@ -132,7 +148,7 @@ export default function ShowcaseModal({ item, index, onClose }) {
 
           {/* Tags in basso */}
           {item.tags && item.tags.length > 0 && (
-            <div className="mt-8 flex flex-wrap gap-2 pt-2 border-t border-white/5">
+            <div className="mt-8 flex flex-wrap gap-2 pt-6 border-t border-white/5">
               {item.tags.map((t) => (
                 <span key={t} className="chip">
                   {t}
