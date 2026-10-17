@@ -33,7 +33,7 @@ export default function ShowcaseModal({ item, index, onClose }) {
     imageClass = "aspect-video object-cover";
   } else if (gallerySize === "large") {
     gridClass = "grid-cols-1 gap-10 md:gap-16";
-    imageClass = "h-auto w-full object-contain"; // Perfetto per frame UI completi
+    imageClass = "h-auto w-full object-contain";
   }
 
   return (
@@ -46,11 +46,16 @@ export default function ShowcaseModal({ item, index, onClose }) {
       role="dialog"
       aria-modal="true"
     >
-      {/* Top Navbar Sticky con tasto Back */}
-      <div className="sticky top-0 z-50 border-b border-white/5 bg-[#05080F]/80 p-4 backdrop-blur-xl md:px-8">
+      {/* Top Navbar Sticky con tasto Back ultra-cliccabile */}
+      <div className="sticky top-0 z-[150] border-b border-white/5 bg-[#05080F]/90 p-4 backdrop-blur-xl md:px-8">
         <button
-          onClick={onClose}
-          className="group flex items-center gap-3 text-slate-400 transition-colors hover:text-white"
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onClose();
+          }}
+          className="group relative z-50 flex cursor-pointer items-center gap-3 text-slate-400 transition-colors hover:text-white"
         >
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/5 transition-colors group-hover:bg-white/10">
             <ArrowLeft size={20} className="transition-transform group-hover:-translate-x-1" />
