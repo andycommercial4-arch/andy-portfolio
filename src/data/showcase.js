@@ -41,17 +41,15 @@ export const SHOWCASE_ITEMS = [
     height: "h-[320px] md:h-[440px]"
   },
   {
-    id: "vault-inventory",
-    title: "Vault Inventory",
-    category: "RPG Inventory",
-    image: "/images/vault-cover.png",
-    blurb: "RPG grid with rarity glow tiers, drag-to-equip slots and a detail pane that never leaves the loot context.",
-    gallerySize: "small",
+    id: "BrainrotSeeds",
+    title: "Brainrot Seeds",
+    category: "Studs Style",
+    image: "/images/noFilter (1).png",
+    blurb: "All the custom frames i made for Brainrot Seeds.",
+    gallerySize: "Large",
     gallery: [
-      "/images/vault-1.png",
-      "/images/vault-2.png",
-      "/images/vault-3.png",
-      "/images/vault-4.png"
+      "/images/Frame4.png",
+
     ],
     tags: ["Figma", "Roblox Studio", "UI/UX Systems"],
     spanMd: "md:col-span-1",
