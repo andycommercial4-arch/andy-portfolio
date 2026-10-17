@@ -3,59 +3,83 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Images } from "lucide-react";
 import Placeholder from "./Placeholder";
 
+/**
+ * ShowcaseModal Component
+ * Full-page overlay displaying detailed project info and asset packages.
+ */
 export default function ShowcaseModal({ item, index, onClose }) {
-  // Blocco scroll nativo
+  // ---------------------------------------------------------------------------
+  // Scroll Lock & Keyboard Handling
+  // ---------------------------------------------------------------------------
   useEffect(() => {
-    const originalStyle = window.getComputedStyle(document.body).overflow;
+    // Preserve initial body overflow style and lock background scroll
+    const previousOverflow = window.getComputedStyle(document.body).overflow;
     document.body.style.overflow = "hidden";
-    
-    const onKey = (e) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", onKey);
+
+    // Dismiss modal on Escape key press
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      document.body.style.overflow = originalStyle;
-      window.removeEventListener("keydown", onKey);
+      // Restore background scroll and remove keyboard listener
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
     };
   }, [onClose]);
 
+  // ---------------------------------------------------------------------------
+  // Asset Grid Dimension Presets
+  // ---------------------------------------------------------------------------
   const galleryImages = item.gallery || [];
   const gallerySize = item.gallerySize || "large";
 
-  let gridClass = "";
-  let imageClass = "";
+  let gridClasses = "";
+  let imageClasses = "";
 
   if (gallerySize === "small") {
-    gridClass = "grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6";
-    imageClass = "aspect-square object-cover";
+    gridClasses = "grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5";
+    imageClasses = "aspect-square object-cover";
   } else if (gallerySize === "medium") {
-    gridClass = "grid-cols-1 md:grid-cols-2 gap-6 md:gap-8";
-    imageClass = "aspect-video object-cover";
-  } else if (gallerySize === "large") {
-    gridClass = "grid-cols-1 gap-10 md:gap-16";
-    imageClass = "h-auto w-full object-contain";
+    gridClasses = "grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 md:gap-8";
+    imageClasses = "aspect-video object-cover";
+  } else {
+    // Default / "large": single-column layout preserving natural asset dimensions
+    gridClasses = "grid-cols-1 gap-8 md:gap-14";
+    imageClasses = "h-auto w-full object-contain";
   }
 
+  // ---------------------------------------------------------------------------
+  // Render
+  // ---------------------------------------------------------------------------
   return (
     <motion.div
       className="fixed inset-0 z-[99999] bg-[#05080F]"
       initial={{ opacity: 0, y: "100%" }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: "100%" }}
-      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
       role="dialog"
       aria-modal="true"
+      aria-label={`${item.title} project details`}
     >
-      {/* Area scrollabile indipendente */}
-      <div className="absolute inset-0 h-full w-full overflow-y-auto overflow-x-hidden scroll-smooth pb-32">
+      {/* Scrollable Viewport Wrapper */}
+      <div className="absolute inset-0 h-full w-full overflow-y-auto overflow-x-hidden scroll-smooth pb-28 sm:pb-36">
         
-        {/* CONTENUTO DELLA PAGINA (Padding top regolato per stare perfettamente sotto la tua Navbar) */}
-        <div className="mx-auto w-full max-w-6xl px-4 pt-28 sm:px-8 sm:pt-32 md:px-12 md:pt-36">
+        {/* Main Content Container: Adjusted top padding leaves room for the global site navbar */}
+        <div className="mx-auto w-full max-w-6xl px-4 pt-20 sm:px-8 sm:pt-24 md:px-12 md:pt-28">
           
-          {/* Header Progetto (Qui ora c'è il tasto BACK allineato con STUDS STYLE!) */}
-          <div className="mb-12">
-            <div className="mb-6 flex flex-wrap items-center gap-3 md:gap-5">
+          {/* Project Header & Meta Controls */}
+          <div className="mb-10 md:mb-14">
+            
+            {/* Top Bar: Inline Back Button + Category + Project ID */}
+            <div className="mb-5 flex flex-wrap items-center gap-3 sm:gap-4 md:gap-5">
               
-              {/* TASTO BACK INLINE */}
+              {/* Back Button */}
               <button
                 type="button"
                 onClick={(e) => {
@@ -63,22 +87,23 @@ export default function ShowcaseModal({ item, index, onClose }) {
                   e.stopPropagation();
                   onClose();
                 }}
-                className="group flex cursor-pointer items-center gap-2 text-slate-400 transition-colors hover:text-white"
+                className="group inline-flex cursor-pointer items-center gap-2 text-slate-400 transition-colors hover:text-white"
+                aria-label="Back to showcase gallery"
               >
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 transition-colors group-hover:bg-white/10">
-                  <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-1" />
+                  <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-0.5" />
                 </div>
-                <span className="hud-mono mt-0.5 text-xs font-bold uppercase tracking-[0.2em]">
+                <span className="hud-mono text-xs font-bold uppercase tracking-[0.2em]">
                   Back
                 </span>
               </button>
 
-              {/* Divisore estetico */}
-              <div className="hidden h-4 w-[1px] bg-white/10 sm:block"></div>
+              {/* Aesthetic Divider */}
+              <span className="hidden h-4 w-px bg-white/10 sm:inline-block" aria-hidden="true" />
 
-              {/* Categoria (es. STUDS STYLE) */}
+              {/* Category Badge */}
               <span
-                className="chip px-4 py-1.5 text-sm"
+                className="chip px-3.5 py-1 text-xs sm:text-sm font-medium"
                 style={{
                   borderColor: "rgba(var(--c-accent-rgb), 0.5)",
                   color: "var(--c-accent)",
@@ -87,76 +112,85 @@ export default function ShowcaseModal({ item, index, onClose }) {
                 {item.category}
               </span>
 
-              {/* Project ID */}
-              <span className="hud-mono text-[12px] tracking-[0.3em] text-slate-500">
+              {/* Project Monospace ID */}
+              <span className="hud-mono text-[11px] sm:text-[12px] tracking-[0.25em] text-slate-500">
                 PROJECT_{String(index + 1).padStart(2, "0")}
               </span>
             </div>
 
-            <h1 className="font-display text-4xl font-extrabold uppercase tracking-tight text-white md:text-6xl lg:text-7xl">
+            {/* Title & Description */}
+            <h1 className="font-display text-3xl font-extrabold uppercase tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
               {item.title}
             </h1>
-            <p className="mt-6 max-w-3xl text-lg leading-relaxed text-slate-400 md:text-xl">
+            <p className="mt-4 max-w-3xl text-base leading-relaxed text-slate-400 sm:text-lg md:text-xl">
               {item.blurb}
             </p>
 
+            {/* Tags List */}
             {item.tags && item.tags.length > 0 && (
-              <div className="mt-8 flex flex-wrap gap-3">
-                {item.tags.map((t) => (
-                  <span key={t} className="tag-mini px-3 py-1.5 text-sm">
-                    {t}
+              <div className="mt-6 flex flex-wrap gap-2 sm:gap-2.5">
+                {item.tags.map((tag) => (
+                  <span key={tag} className="tag-mini px-3 py-1 text-xs">
+                    {tag}
                   </span>
                 ))}
               </div>
             )}
           </div>
 
-          {/* Immagine di Copertina Grande */}
-          <div className="relative mb-16 h-64 w-full overflow-hidden rounded-2xl md:h-[500px]">
+          {/* Primary Featured Cover Image */}
+          <div className="relative mb-12 h-60 w-full overflow-hidden rounded-2xl sm:h-80 md:mb-16 md:h-[460px] lg:h-[520px]">
             <Placeholder item={item} index={index} large />
-            <div className="absolute inset-0 rounded-2xl border border-white/10" />
+            <div className="pointer-events-none absolute inset-0 rounded-2xl border border-white/10" />
           </div>
 
-          {/* Galleria Immagini */}
-          <div className="mb-20">
-            <div className="mb-8 flex items-center gap-3 border-b border-white/5 pb-4 text-white">
-              <Images size={24} style={{ color: "var(--c-primary)" }} />
-              <h2 className="hud-mono text-sm font-bold uppercase tracking-[0.25em] text-slate-200">
-                Project Assets / ({galleryImages.length})
+          {/* Assets Gallery Section */}
+          <div className="mb-12">
+            <div className="mb-6 flex items-center gap-2.5 border-b border-white/5 pb-3.5 text-white md:mb-8">
+              <Images size={20} style={{ color: "var(--c-primary)" }} aria-hidden="true" />
+              <h2 className="hud-mono text-xs sm:text-sm font-bold uppercase tracking-[0.22em] text-slate-200">
+                Project Assets ({galleryImages.length})
               </h2>
             </div>
 
             {galleryImages.length > 0 ? (
-              <div className={`grid ${gridClass}`}>
+              <div className={`grid ${gridClasses}`}>
                 {galleryImages.map((imgSrc, i) => (
                   <motion.div
                     key={i}
-                    initial={{ opacity: 0, y: 30 }}
+                    initial={{ opacity: 0, y: 24 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: "-50px" }}
-                    transition={{ delay: 0.1, duration: 0.6 }}
+                    viewport={{ once: true, margin: "-40px" }}
+                    transition={{ delay: 0.08, duration: 0.55 }}
                     className="group relative overflow-hidden rounded-2xl bg-[#0A0F1A] shadow-2xl ring-1 ring-white/5"
                   >
                     <img
                       src={imgSrc}
-                      alt={`${item.title} asset ${i + 1}`}
-                      className={`w-full transition-transform duration-700 ease-out ${
+                      alt={`${item.title} asset preview ${i + 1}`}
+                      className={`w-full transition-transform duration-500 ease-out ${
                         gallerySize !== "large" ? "group-hover:scale-105" : ""
-                      } ${imageClass}`}
+                      } ${imageClasses}`}
                       loading="lazy"
                       onError={(e) => {
+                        // Graceful fallback box if an asset is not found
                         e.currentTarget.style.display = "none";
                         e.currentTarget.parentElement.classList.add(
-                          "flex", "items-center", "justify-center", "min-h-[300px]", "text-sm", "font-mono", "text-slate-500"
+                          "flex",
+                          "items-center",
+                          "justify-center",
+                          "min-h-[240px]",
+                          "text-xs",
+                          "font-mono",
+                          "text-slate-500"
                         );
-                        e.currentTarget.parentElement.innerText = `[ IMAGE MISSING: ASSET_${i + 1} ]`;
+                        e.currentTarget.parentElement.innerText = `[ ASSET_${i + 1} NOT FOUND ]`;
                       }}
                     />
                   </motion.div>
                 ))}
               </div>
             ) : (
-              <div className="rounded-2xl border border-dashed border-white/10 p-16 text-center text-lg text-slate-500">
+              <div className="rounded-2xl border border-dashed border-white/10 p-12 text-center text-sm sm:text-base text-slate-500">
                 Awaiting assets upload...
               </div>
             )}
