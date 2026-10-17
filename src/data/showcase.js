@@ -33,7 +33,7 @@ export const SHOWCASE_ITEMS = [
     blurb: "All the Frames And Buttons I made for Fast Type For Brainrot Game.",
     gallerySize: "medium",
     gallery: [
-      "/images/aurora-1.png",
+      "/images/Frame3.png",
       "/images/aurora-2.png",
       "/images/aurora-3.png",
       "/images/aurora-4.png"
