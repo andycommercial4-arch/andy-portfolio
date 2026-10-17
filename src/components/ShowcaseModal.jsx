@@ -2,28 +2,34 @@ import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, Images } from "lucide-react";
 import Placeholder from "./Placeholder";
+import { lockScroll } from "../lib/scroll";
 
 /**
  * ShowcaseModal Component
- * Full-page overlay with native wheel scroll and mobile touch-drag support.
+ * Full-page isolated overlay with wheel/touch propagation isolation.
  */
 export default function ShowcaseModal({ item, index, onClose }) {
   const containerRef = useRef(null);
 
   // ---------------------------------------------------------------------------
-  // Scroll Lock, Auto-Focus & Keyboard Handling
+  // Complete Main Page Freeze (Body + HTML + Custom Scroll Engine)
   // ---------------------------------------------------------------------------
   useEffect(() => {
-    // 1. Lock background page scroll
-    const previousOverflow = window.getComputedStyle(document.body).overflow;
-    document.body.style.overflow = "hidden";
+    // 1. Tell your site's custom scroll engine to freeze
+    lockScroll(true);
 
-    // 2. AUTO-FOCUS TRICK: forces browser to capture mouse wheel on this container immediately
+    // 2. Lock both HTML and BODY to prevent any background viewport shift
+    const prevBodyOverflow = document.body.style.overflow;
+    const prevHtmlOverflow = document.documentElement.style.overflow;
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+
+    // 3. Immediately focus the modal container so keyboard & wheel target it
     if (containerRef.current) {
       containerRef.current.focus();
     }
 
-    // 3. Dismiss modal on Escape key press
+    // 4. Dismiss on Escape
     const handleKeyDown = (event) => {
       if (event.key === "Escape") {
         onClose();
@@ -33,7 +39,10 @@ export default function ShowcaseModal({ item, index, onClose }) {
     window.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      document.body.style.overflow = previousOverflow;
+      // Restore everything when exiting
+      lockScroll(false);
+      document.body.style.overflow = prevBodyOverflow;
+      document.documentElement.style.overflow = prevHtmlOverflow;
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [onClose]);
@@ -54,7 +63,7 @@ export default function ShowcaseModal({ item, index, onClose }) {
     gridClasses = "grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 md:gap-8";
     imageClasses = "aspect-video object-cover";
   } else {
-    // "large" preset: single-column full-width frame display
+    // Default "large": full-width showcase view
     gridClasses = "grid-cols-1 gap-8 md:gap-14";
     imageClasses = "h-auto w-full object-contain";
   }
@@ -65,11 +74,17 @@ export default function ShowcaseModal({ item, index, onClose }) {
   return (
     <motion.div
       ref={containerRef}
-      tabIndex={-1} // Enables focus so wheel/keyboard scroll targets this container
+      tabIndex={-1}
+      // DATA ATTRIBUTE: Tells smooth-scroll libraries (like Lenis) to NOT hijack this element!
+      data-lenis-prevent="true"
+      data-scroll-prevent="true"
+      // EVENT STOPPERS: Stops wheel/touch events from bubbling up to the main page!
+      onWheel={(e) => e.stopPropagation()}
+      onTouchMove={(e) => e.stopPropagation()}
       className="fixed inset-0 z-[99999] bg-[#05080F] overflow-y-auto overflow-x-hidden outline-none touch-pan-y overscroll-contain pb-28 sm:pb-36"
       style={{
-        WebkitOverflowScrolling: "touch", // Smooth iOS swipe scrolling
-        touchAction: "pan-y",             // Allows vertical touch dragging on mobile
+        WebkitOverflowScrolling: "touch",
+        touchAction: "pan-y",
       }}
       initial={{ opacity: 0, y: "100%" }}
       animate={{ opacity: 1, y: 0 }}
@@ -79,7 +94,7 @@ export default function ShowcaseModal({ item, index, onClose }) {
       aria-modal="true"
       aria-label={`${item.title} project details`}
     >
-      {/* Main Content Wrapper: pt- leaves comfortable breathing room below top navbar */}
+      {/* Main Content Wrapper */}
       <div className="mx-auto w-full max-w-6xl px-4 pt-20 sm:px-8 sm:pt-24 md:px-12 md:pt-28 pointer-events-auto">
         
         {/* Project Header & Controls */}
