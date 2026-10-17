@@ -1,112 +1,92 @@
-export const SHOWCASE_FILTERS = [
-  "All",
-  "Studs Style",
-  "Clean Minimal",
-  "RPG Inventory",
-  "Tactical",
-  "Sci-Fi HUD"
-];
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowUpRight } from "lucide-react";
+import { SHOWCASE_ITEMS, SHOWCASE_FILTERS } from "../data/showcase";
+import Placeholder from "./Placeholder";
+import ShowcaseModal from "./ShowcaseModal";
+import { Reveal } from "./Reveal";
 
-export const SHOWCASE_ITEMS = [
-  {
-    id: "nebula-main-menu",
-    title: "Key RNG Comms",
-    category: "Studs Style",
-    image: "/images/logo.png",
-    blurb: "All the Frames And Buttons I made for Key RNG Game.",
-    gallerySize: "large", // "small", "medium", o "large"
-    gallery: [
-      "/images/key-rng-1.png",
-      "/images/key-rng-2.png",
-      "/images/key-rng-3.png"
-    ],
-    tags: ["Studs", "Clean", "UI System"],
-    spanMd: "md:col-span-2",
-    spanLg: "lg:col-span-7",
-    height: "h-[320px] md:h-[440px]",
-  },
-  {
-    id: "aurora-shop",
-    title: "Aurora Shop",
-    category: "Clean Minimal",
-    image: "/images/aurora-cover.png",
-    blurb: "Storefront built on a strict 8-pt grid: featured bundle hero, tabbed categories and a frictionless purchase flow.",
-    gallerySize: "medium",
-    gallery: [
-      "/images/aurora-1.png",
-      "/images/aurora-2.png",
-      "/images/aurora-3.png",
-      "/images/aurora-4.png"
-    ],
-    tags: ["Figma", "Scalable Layouts", "UI/UX Systems"],
-    spanMd: "md:col-span-1",
-    spanLg: "lg:col-span-5",
-    height: "h-[320px] md:h-[440px]",
-  },
-  {
-    id: "vault-inventory",
-    title: "Vault Inventory",
-    category: "RPG Inventory",
-    image: "/images/vault-cover.png",
-    blurb: "RPG grid with rarity glow tiers, drag-to-equip slots and a detail pane that never leaves the loot context.",
-    gallerySize: "small",
-    gallery: [
-      "/images/vault-1.png",
-      "/images/vault-2.png",
-      "/images/vault-3.png",
-      "/images/vault-4.png"
-    ],
-    tags: ["Figma", "Roblox Studio", "UI/UX Systems"],
-    spanMd: "md:col-span-1",
-    spanLg: "lg:col-span-5",
-    height: "h-[300px] md:h-[380px]",
-  },
-  {
-    id: "strike-hud",
-    title: "Strike Tactical HUD",
-    category: "Tactical",
-    image: "/images/strike-cover.png",
-    blurb: "Combat HUD with radial ability cooldowns, minimap frame and damage callouts tuned for competitive clarity.",
-    gallerySize: "large",
-    gallery: [
-      "/images/strike-1.png",
-      "/images/strike-2.png"
-    ],
-    tags: ["Roblox Studio", "UI Animations", "Vector Artwork"],
-    spanMd: "md:col-span-1",
-    spanLg: "lg:col-span-7",
-    height: "h-[300px] md:h-[380px]",
-  },
-  {
-    id: "pulse-settings",
-    title: "Pulse Settings",
-    category: "Clean Minimal",
-    image: "/images/pulse-cover.png",
-    blurb: "Settings surface with grouped controls, instant-apply toggles and keyboard-first navigation.",
-    gallerySize: "medium",
-    gallery: [
-      "/images/pulse-1.png",
-      "/images/pulse-2.png"
-    ],
-    tags: ["Figma", "Wireframing", "UI/UX Systems"],
-    spanMd: "md:col-span-1",
-    spanLg: "lg:col-span-6",
-    height: "h-[280px] md:h-[340px]",
-  },
-  {
-    id: "overdrive-ability-bar",
-    title: "Overdrive Ability Bar",
-    category: "Sci-Fi HUD",
-    image: "/images/overdrive-cover.png",
-    blurb: "Motion-first ability bar with charge states, keybind chips and an ultimate-ready glow signature.",
-    gallerySize: "medium",
-    gallery: [
-      "/images/overdrive-1.png",
-      "/images/overdrive-2.png"
-    ],
-    tags: ["Figma", "UI Animations", "Roblox Studio"],
-    spanMd: "md:col-span-1",
-    spanLg: "lg:col-span-6",
-    height: "h-[280px] md:h-[340px]",
-  },
-];
+const glowFollow = (e) => {
+  const r = e.currentTarget.getBoundingClientRect();
+  e.currentTarget.style.setProperty("--mx", `${e.clientX - r.left}px`);
+  e.currentTarget.style.setProperty("--my", `${e.clientY - r.top}px`);
+};
+
+export default function Showcase() {
+  const [filter, setFilter] = useState("All");
+  const [active, setActive] = useState(null);
+
+  const items =
+    filter === "All"
+      ? SHOWCASE_ITEMS
+      : SHOWCASE_ITEMS.filter((i) => i.category === filter);
+
+  return (
+    <section id="showcase" className="section-pad relative" data-testid="showcase-section">
+      <div className="wrap">
+        <Reveal>
+          <div className="eyebrow mb-5 inline-flex items-center gap-2">// 01 — SHOWCASE</div>
+          <div className="flex flex-wrap items-end justify-between gap-6">
+            <h2 className="font-display text-3xl font-bold uppercase tracking-tight text-white sm:text-4xl lg:text-5xl">
+              UI <span className="text-grad">Gallery</span>
+            </h2>
+            <p className="max-w-sm text-sm leading-relaxed text-slate-400">
+              An asymmetrical bento of interface systems. Click a card for the full design breakdown.
+            </p>
+          </div>
+        </Reveal>
+
+        <Reveal delay={0.1}>
+          <div className="mt-8 flex flex-wrap gap-2" role="tablist" aria-label="Filter by category">
+            {SHOWCASE_FILTERS.map((f) => (
+              <button
+                key={f}
+                role="tab"
+                aria-selected={filter === f}
+                className={`filter-btn ${filter === f ? "active" : ""}`}
+                onClick={() => setFilter(f)}
+                data-testid={`showcase-filter-${f.toLowerCase().replace(/\s+/g, "-")}`}
+              >
+                {f}
+              </button>
+            ))}
+          </div>
+        </Reveal>
+
+        <motion.div layout className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 lg:grid-cols-12">
+          {items.map((item) => {
+            const index = SHOWCASE_ITEMS.indexOf(item);
+            return (
+              <motion.article
+                layout
+                key={item.id}
+                className={`showcase-card group relative cursor-pointer overflow-hidden rounded-2xl ${item.spanMd} ${item.spanLg} ${item.height}`}
+                onClick={() => setActive(item)}
+                onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setActive(item)}
+                onMouseMove={glowFollow}
+                tabIndex={0}
+                role="button"
+                aria-label={`Open details for ${item.title}`}
+                data-testid={`showcase-card-${item.id}`}
+                initial={{ opacity: 0, y: 32 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.15 }}
+                transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <Placeholder item={item} index={index} />
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#080C14] via-[#080C14]/20 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-5 md:p-6">
+                  <div>
+                    <span
+                      className="chip mb-2.5 inline-flex"
+                      style={{
+                        borderColor: "rgba(var(--c-accent-rgb), 0.5)",
+                        color: "var(--c-accent)",
+                      }}
+                    >
+                      {item.category}
+                    </span>
+                    <h3 className="font-display text-lg font-bold text-white sm:text-xl">{item.title}</h3>
+                    <div className="mt-2.5 flex flex-wrap gap-1.5">
+                      {item.tags.slice(0, 3).map((t) => (
+                        <span key={t} cl
