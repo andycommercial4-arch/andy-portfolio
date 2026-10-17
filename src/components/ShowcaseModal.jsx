@@ -5,16 +5,29 @@ import Placeholder from "./Placeholder";
 import { lockScroll } from "../lib/scroll";
 
 export default function ShowcaseModal({ item, index, onClose }) {
-  // Blocca lo scroll della pagina sottostante
+  // Gestione dello Scroll e chiusura automatica
   useEffect(() => {
     lockScroll(true);
     document.documentElement.style.overflow = "hidden";
+    
+    // Chiudi con ESCAPE
     const onKey = (e) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
+
+    // IL TRUCCO MAGICO: Se clicchi un link della tua Navbar (es. #skills), chiudi la modale!
+    const handleAnchorClick = (e) => {
+      const anchor = e.target.closest("a");
+      if (anchor && anchor.hash) {
+        onClose(); 
+      }
+    };
+    document.addEventListener("click", handleAnchorClick);
+
     return () => {
       lockScroll(false);
       document.documentElement.style.overflow = "";
       window.removeEventListener("keydown", onKey);
+      document.removeEventListener("click", handleAnchorClick);
     };
   }, [onClose]);
 
@@ -46,25 +59,27 @@ export default function ShowcaseModal({ item, index, onClose }) {
       role="dialog"
       aria-modal="true"
     >
-      {/* TASTO BACK GALLEGGIANTE - INFALLIBILE (z-index 9999) */}
-      <button
-        type="button"
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          onClose();
-        }}
-        className="fixed left-4 top-4 z-[9999] flex cursor-pointer items-center gap-2 rounded-full border border-white/10 bg-black/60 px-5 py-2.5 text-white shadow-2xl backdrop-blur-md transition-all hover:scale-105 hover:bg-white/10 md:left-8 md:top-8"
-      >
-        <ArrowLeft size={18} />
-        <span className="hud-mono text-xs font-bold uppercase tracking-[0.2em] mt-0.5">
-          Back
-        </span>
-      </button>
-
-      {/* Contenuto principale della pagina (con padding top maggiorato per non coprire il titolo) */}
+      {/* Contenuto principale della pagina (pt-24/32 dà spazio alla tua Navbar globale in alto) */}
       <div className="mx-auto w-full max-w-6xl p-4 pt-24 sm:p-8 sm:pt-28 md:p-12 md:pt-32">
         
+        {/* TASTO BACK INLINE (non verrà MAI coperto dalla navbar) */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onClose();
+          }}
+          className="group mb-10 flex cursor-pointer items-center gap-3 text-slate-400 transition-colors hover:text-white"
+        >
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/5 transition-colors group-hover:bg-white/10">
+            <ArrowLeft size={20} className="transition-transform group-hover:-translate-x-1" />
+          </div>
+          <span className="hud-mono mt-0.5 text-xs font-bold uppercase tracking-[0.2em]">
+            Back to Gallery
+          </span>
+        </button>
+
         {/* Header Progetto */}
         <div className="mb-12">
           <div className="mb-6 flex flex-wrap items-center gap-4">
