@@ -3,7 +3,7 @@ export const SHOWCASE_FILTERS = ["All", "Ciccio Tag", "Sci-Fi HUD", "Clean Minim
 export const SHOWCASE_ITEMS = [
   {
     id: "nebula-main-menu",
-    title: "Ciccio Main Menu",
+    title: "Ciccio Figo Menu",
     category: "Ciccio Tag",
     image: "/images/logo.png",
     blurb: "Full lobby shell with animated backdrop, clear action hierarchy and a game-mode carousel built for thumb reach.",
