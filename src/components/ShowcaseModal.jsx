@@ -6,43 +6,82 @@ import { lockScroll } from "../lib/scroll";
 
 /**
  * ShowcaseModal Component
- * Full-page isolated overlay with wheel/touch propagation isolation.
+ * Full-page isolated overlay with hardware-level wheel capture interception.
  */
 export default function ShowcaseModal({ item, index, onClose }) {
   const containerRef = useRef(null);
 
   // ---------------------------------------------------------------------------
-  // Complete Main Page Freeze (Body + HTML + Custom Scroll Engine)
+  // NUCLEAR SCROLL HIJACK: Kills background scroll at the window capture phase!
   // ---------------------------------------------------------------------------
   useEffect(() => {
-    // 1. Tell your site's custom scroll engine to freeze
+    // 1. Freeze project's internal scroll utility
     lockScroll(true);
 
-    // 2. Lock both HTML and BODY to prevent any background viewport shift
     const prevBodyOverflow = document.body.style.overflow;
     const prevHtmlOverflow = document.documentElement.style.overflow;
     document.body.style.overflow = "hidden";
     document.documentElement.style.overflow = "hidden";
 
-    // 3. Immediately focus the modal container so keyboard & wheel target it
-    if (containerRef.current) {
-      containerRef.current.focus();
-    }
+    const modal = containerRef.current;
 
-    // 4. Dismiss on Escape
+    // 2. HARDWARE WHEEL INTERCEPTOR (CAPTURE PHASE)
+    const handleCaptureWheel = (e) => {
+      if (!modal) return;
+
+      // STOP ALL OTHER SCRIPTS ON WINDOW/BODY FROM RECEIVING THIS WHEEL EVENT!
+      e.stopImmediatePropagation();
+      e.stopPropagation();
+
+      // Normalize delta (handles Firefox line scrolling vs Chrome pixel scrolling)
+      const delta = e.deltaMode === 1 ? e.deltaY * 33 : e.deltaY;
+
+      // Manually drive the modal's scroll container directly
+      modal.scrollTop += delta;
+
+      // Cancel default window action so background NEVER scrolls
+      e.preventDefault();
+    };
+
+    // 3. CAPTURE TOUCH FOR MOBILE
+    let startY = 0;
+    const handleTouchStart = (e) => {
+      startY = e.touches[0].clientY;
+    };
+
+    const handleTouchMove = (e) => {
+      if (!modal) return;
+      e.stopImmediatePropagation();
+
+      const currentY = e.touches[0].clientY;
+      const deltaY = startY - currentY;
+      startY = currentY;
+
+      modal.scrollTop += deltaY;
+      e.preventDefault();
+    };
+
+    // Attach in CAPTURE mode: executes BEFORE Lenis or any background smooth-scroll!
+    window.addEventListener("wheel", handleCaptureWheel, { passive: false, capture: true });
+    window.addEventListener("touchstart", handleTouchStart, { passive: true, capture: true });
+    window.addEventListener("touchmove", handleTouchMove, { passive: false, capture: true });
+
+    // Keyboard ESC listener
     const handleKeyDown = (event) => {
       if (event.key === "Escape") {
         onClose();
       }
     };
-
     window.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      // Restore everything when exiting
       lockScroll(false);
       document.body.style.overflow = prevBodyOverflow;
       document.documentElement.style.overflow = prevHtmlOverflow;
+
+      window.removeEventListener("wheel", handleCaptureWheel, { capture: true });
+      window.removeEventListener("touchstart", handleTouchStart, { capture: true });
+      window.removeEventListener("touchmove", handleTouchMove, { capture: true });
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [onClose]);
@@ -63,7 +102,6 @@ export default function ShowcaseModal({ item, index, onClose }) {
     gridClasses = "grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 md:gap-8";
     imageClasses = "aspect-video object-cover";
   } else {
-    // Default "large": full-width showcase view
     gridClasses = "grid-cols-1 gap-8 md:gap-14";
     imageClasses = "h-auto w-full object-contain";
   }
@@ -75,16 +113,12 @@ export default function ShowcaseModal({ item, index, onClose }) {
     <motion.div
       ref={containerRef}
       tabIndex={-1}
-      // DATA ATTRIBUTE: Tells smooth-scroll libraries (like Lenis) to NOT hijack this element!
       data-lenis-prevent="true"
       data-scroll-prevent="true"
-      // EVENT STOPPERS: Stops wheel/touch events from bubbling up to the main page!
-      onWheel={(e) => e.stopPropagation()}
-      onTouchMove={(e) => e.stopPropagation()}
-      className="fixed inset-0 z-[99999] bg-[#05080F] overflow-y-auto overflow-x-hidden outline-none touch-pan-y overscroll-contain pb-28 sm:pb-36"
+      className="fixed inset-0 z-[99999] bg-[#05080F] overflow-y-auto overflow-x-hidden outline-none pb-28 sm:pb-36"
       style={{
         WebkitOverflowScrolling: "touch",
-        touchAction: "pan-y",
+        touchAction: "none", // Managed by our manual touch interceptor
       }}
       initial={{ opacity: 0, y: "100%" }}
       animate={{ opacity: 1, y: 0 }}
