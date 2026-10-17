@@ -4,19 +4,19 @@ import { ArrowLeft, Images } from "lucide-react";
 import Placeholder from "./Placeholder";
 import { lockScroll } from "../lib/scroll";
 
-export default function ShowcaseDetail({ item, index, onBack }) {
-  // Blocca lo scroll della pagina sottostante mentre siamo in questa "nuova pagina"
+export default function ShowcaseModal({ item, index, onClose }) {
+  // Blocca lo scroll della pagina sottostante
   useEffect(() => {
     lockScroll(true);
     document.documentElement.style.overflow = "hidden";
-    const onKey = (e) => e.key === "Escape" && onBack();
+    const onKey = (e) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
     return () => {
       lockScroll(false);
       document.documentElement.style.overflow = "";
       window.removeEventListener("keydown", onKey);
     };
-  }, [onBack]);
+  }, [onClose]);
 
   const galleryImages = item.gallery || [];
   const gallerySize = item.gallerySize || "large";
@@ -49,7 +49,7 @@ export default function ShowcaseDetail({ item, index, onBack }) {
       {/* Top Navbar Sticky con tasto Back */}
       <div className="sticky top-0 z-50 border-b border-white/5 bg-[#05080F]/80 p-4 backdrop-blur-xl md:px-8">
         <button
-          onClick={onBack}
+          onClick={onClose}
           className="group flex items-center gap-3 text-slate-400 transition-colors hover:text-white"
         >
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/5 transition-colors group-hover:bg-white/10">
