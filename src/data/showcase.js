@@ -14,13 +14,11 @@ export const SHOWCASE_ITEMS = [
     category: "Studs Style",
     image: "/images/logo.png",
     blurb: "All the Frames And Buttons I made for Key RNG Game.",
+    gallerySize: "large", // SCEGLI TRA: "small", "medium", "large"
     gallery: [
-      "/images/public/images/Screenshot 2026-10-17 225928.png",
+      "/images/Screenshot 2026-10-17 225928.png",
       "/images/key-rng-2.png",
-      "/images/key-rng-3.png",
-      "/images/key-rng-4.png",
-      "/images/key-rng-5.png",
-      "/images/key-rng-6.png"
+      "/images/key-rng-3.png"
     ],
     tags: ["Studs", "Clean", "UI System"],
     spanMd: "md:col-span-2",
@@ -33,6 +31,7 @@ export const SHOWCASE_ITEMS = [
     category: "Clean Minimal",
     image: "/images/aurora-cover.png",
     blurb: "Storefront built on a strict 8-pt grid: featured bundle hero, tabbed categories and a frictionless purchase flow.",
+    gallerySize: "medium", // SCEGLI TRA: "small", "medium", "large"
     gallery: [
       "/images/aurora-1.png",
       "/images/aurora-2.png",
@@ -50,6 +49,7 @@ export const SHOWCASE_ITEMS = [
     category: "RPG Inventory",
     image: "/images/vault-cover.png",
     blurb: "RPG grid with rarity glow tiers, drag-to-equip slots and a detail pane that never leaves the loot context.",
+    gallerySize: "small", // SCEGLI TRA: "small", "medium", "large"
     gallery: [
       "/images/vault-1.png",
       "/images/vault-2.png",
@@ -67,11 +67,10 @@ export const SHOWCASE_ITEMS = [
     category: "Tactical",
     image: "/images/strike-cover.png",
     blurb: "Combat HUD with radial ability cooldowns, minimap frame and damage callouts tuned for competitive clarity.",
+    gallerySize: "large",
     gallery: [
       "/images/strike-1.png",
-      "/images/strike-2.png",
-      "/images/strike-3.png",
-      "/images/strike-4.png"
+      "/images/strike-2.png"
     ],
     tags: ["Roblox Studio", "UI Animations", "Vector Artwork"],
     spanMd: "md:col-span-1",
@@ -84,11 +83,10 @@ export const SHOWCASE_ITEMS = [
     category: "Clean Minimal",
     image: "/images/pulse-cover.png",
     blurb: "Settings surface with grouped controls, instant-apply toggles and keyboard-first navigation.",
+    gallerySize: "medium",
     gallery: [
       "/images/pulse-1.png",
-      "/images/pulse-2.png",
-      "/images/pulse-3.png",
-      "/images/pulse-4.png"
+      "/images/pulse-2.png"
     ],
     tags: ["Figma", "Wireframing", "UI/UX Systems"],
     spanMd: "md:col-span-1",
@@ -101,11 +99,10 @@ export const SHOWCASE_ITEMS = [
     category: "Sci-Fi HUD",
     image: "/images/overdrive-cover.png",
     blurb: "Motion-first ability bar with charge states, keybind chips and an ultimate-ready glow signature.",
+    gallerySize: "medium",
     gallery: [
       "/images/overdrive-1.png",
-      "/images/overdrive-2.png",
-      "/images/overdrive-3.png",
-      "/images/overdrive-4.png"
+      "/images/overdrive-2.png"
     ],
     tags: ["Figma", "UI Animations", "Roblox Studio"],
     spanMd: "md:col-span-1",
