@@ -57,15 +57,14 @@ export const SHOWCASE_ITEMS = [
     height: "h-[300px] md:h-[380px]"
   },
   {
-    id: "strike-hud",
-    title: "Strike Tactical HUD",
-    category: "Tactical",
-    image: "/images/strike-cover.png",
+    id: "Roll&Fight",
+    title: "Roll & Fight!",
+    category: "Studs Style",
+    image: "/images/Screenshot 2026-10-18 003818.png",
     blurb: "Combat HUD with radial ability cooldowns, minimap frame and damage callouts tuned for competitive clarity.",
     gallerySize: "large",
     gallery: [
-      "/images/strike-1.png",
-      "/images/strike-2.png"
+      "/images/Copertina5.png",
     ],
     tags: ["Roblox Studio", "UI Animations", "Vector Artwork"],
     spanMd: "md:col-span-1",
