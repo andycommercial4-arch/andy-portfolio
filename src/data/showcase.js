@@ -17,7 +17,7 @@ export const SHOWCASE_ITEMS = [
     gallerySize: "large",
     gallery: [
       "/images/Frame1.png",
-      "/images/key-rng-2.png",
+      "/images/Frame2.png",
       "/images/key-rng-3.png"
     ],
     tags: ["Studs", "Clean", "UI System"],
