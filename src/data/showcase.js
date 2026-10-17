@@ -16,7 +16,7 @@ export const SHOWCASE_ITEMS = [
     blurb: "All the Frames And Buttons I made for Key RNG Game.",
     gallerySize: "large",
     gallery: [
-      "/images/Screenshot 2026-10-17 225928.png",
+      "/images/Frame1.png",
       "/images/key-rng-2.png",
       "/images/key-rng-3.png"
     ],
