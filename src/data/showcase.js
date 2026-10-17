@@ -12,7 +12,7 @@ export const SHOWCASE_ITEMS = [
     id: "nebula-main-menu",
     title: "Key RNG Comms",
     category: "Studs Style",
-    image: "/images/logo.png",
+    image: "/images/Copertina.png",
     blurb: "All the Frames And Buttons I made for Key RNG Game.",
     gallerySize: "large",
     gallery: [
