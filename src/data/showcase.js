@@ -26,11 +26,11 @@ export const SHOWCASE_ITEMS = [
     height: "h-[320px] md:h-[440px]"
   },
   {
-    id: "aurora-shop",
-    title: "Aurora Shop",
-    category: "Clean Minimal",
-    image: "/images/aurora-cover.png",
-    blurb: "Storefront built on a strict 8-pt grid: featured bundle hero, tabbed categories and a frictionless purchase flow.",
+    id: "fast-type",
+    title: "Fast Type For Brainrot",
+    category: "Studs Style",
+    image: "/images/noFilter (6).webp",
+    blurb: "All the Frames And Buttons I made for Fast Type For Brainrot Game.",
     gallerySize: "medium",
     gallery: [
       "/images/aurora-1.png",
