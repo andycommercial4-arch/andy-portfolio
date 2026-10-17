@@ -14,9 +14,9 @@ export const SHOWCASE_ITEMS = [
     category: "Studs Style",
     image: "/images/logo.png",
     blurb: "All the Frames And Buttons I made for Key RNG Game.",
-    gallerySize: "large", // SCEGLI TRA: "small", "medium", "large"
+    gallerySize: "large", // "small", "medium", o "large"
     gallery: [
-      "/images/Screenshot 2026-10-17 225928.png",
+      "/images/key-rng-1.png",
       "/images/key-rng-2.png",
       "/images/key-rng-3.png"
     ],
@@ -31,7 +31,7 @@ export const SHOWCASE_ITEMS = [
     category: "Clean Minimal",
     image: "/images/aurora-cover.png",
     blurb: "Storefront built on a strict 8-pt grid: featured bundle hero, tabbed categories and a frictionless purchase flow.",
-    gallerySize: "medium", // SCEGLI TRA: "small", "medium", "large"
+    gallerySize: "medium",
     gallery: [
       "/images/aurora-1.png",
       "/images/aurora-2.png",
@@ -49,7 +49,7 @@ export const SHOWCASE_ITEMS = [
     category: "RPG Inventory",
     image: "/images/vault-cover.png",
     blurb: "RPG grid with rarity glow tiers, drag-to-equip slots and a detail pane that never leaves the loot context.",
-    gallerySize: "small", // SCEGLI TRA: "small", "medium", "large"
+    gallerySize: "small",
     gallery: [
       "/images/vault-1.png",
       "/images/vault-2.png",
