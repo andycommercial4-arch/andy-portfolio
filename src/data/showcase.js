@@ -31,12 +31,9 @@ export const SHOWCASE_ITEMS = [
     category: "Studs Style",
     image: "/images/noFilter (6).webp",
     blurb: "All the Frames And Buttons I made for Fast Type For Brainrot Game.",
-    gallerySize: "medium",
+    gallerySize: "large",
     gallery: [
       "/images/Frame3.png",
-      "/images/aurora-2.png",
-      "/images/aurora-3.png",
-      "/images/aurora-4.png"
     ],
     tags: ["Figma", "Scalable Layouts", "UI/UX Systems"],
     spanMd: "md:col-span-1",
