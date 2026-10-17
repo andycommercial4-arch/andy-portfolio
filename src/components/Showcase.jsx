@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import { SHOWCASE_ITEMS, SHOWCASE_FILTERS } from "../data/showcase";
 import Placeholder from "./Placeholder";
-import ShowcaseModal from "./ShowcaseModal";
+import ShowcaseDetail from "./ShowcaseDetail"; // BAU! Aggiornato l'import
 import { Reveal } from "./Reveal";
 
 const glowFollow = (e) => {
@@ -105,10 +105,10 @@ export default function Showcase() {
 
       <AnimatePresence>
         {active && (
-          <ShowcaseModal
+          <ShowcaseDetail
             item={active}
             index={SHOWCASE_ITEMS.indexOf(active)}
-            onClose={() => setActive(null)}
+            onBack={() => setActive(null)}
           />
         )}
       </AnimatePresence>
