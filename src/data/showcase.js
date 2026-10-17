@@ -89,4 +89,30 @@ export default function Showcase() {
                     <h3 className="font-display text-lg font-bold text-white sm:text-xl">{item.title}</h3>
                     <div className="mt-2.5 flex flex-wrap gap-1.5">
                       {item.tags.slice(0, 3).map((t) => (
-                        <span key={t} cl
+                        <span key={t} className="tag-mini">{t}</span>
+                      ))}
+                    </div>
+                  </div>
+                  <span className="view-hint">
+                    VIEW <ArrowUpRight size={14} className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                  </span>
+                </div>
+              </motion.article>
+            );
+          })}
+        </motion.div>
+      </div>
+
+      <AnimatePresence mode="wait">
+        {active && (
+          <ShowcaseModal
+            key="showcase-modal"
+            item={active}
+            index={SHOWCASE_ITEMS.indexOf(active)}
+            onClose={() => setActive(null)}
+          />
+        )}
+      </AnimatePresence>
+    </section>
+  );
+}
