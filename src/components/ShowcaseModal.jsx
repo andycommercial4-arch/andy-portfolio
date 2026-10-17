@@ -4,18 +4,15 @@ import { ArrowLeft, Images } from "lucide-react";
 import Placeholder from "./Placeholder";
 
 export default function ShowcaseModal({ item, index, onClose }) {
-  // NUOVO SISTEMA DI BLOCCO SCROLL (Nativo e sicuro 100%)
+  // Blocco scroll nativo: sicuro e non rompe la rotellina!
   useEffect(() => {
-    // Salviamo lo stile originale e blocchiamo il body
     const originalStyle = window.getComputedStyle(document.body).overflow;
     document.body.style.overflow = "hidden";
     
-    // Chiude se premi ESC
     const onKey = (e) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
 
     return () => {
-      // Ripristina lo scroll normale quando esci
       document.body.style.overflow = originalStyle;
       window.removeEventListener("keydown", onKey);
     };
@@ -39,7 +36,6 @@ export default function ShowcaseModal({ item, index, onClose }) {
   }
 
   return (
-    // Z-INDEX ESTREMO: 99999 Copre tutto, inclusa la tua Navbar!
     <motion.div
       className="fixed inset-0 z-[99999] bg-[#05080F]"
       initial={{ opacity: 0, y: "100%" }}
@@ -49,10 +45,10 @@ export default function ShowcaseModal({ item, index, onClose }) {
       role="dialog"
       aria-modal="true"
     >
-      {/* AREA SCROLLABILE INDIPENDENTE */}
+      {/* Area scrollabile indipendente */}
       <div className="absolute inset-0 h-full w-full overflow-y-auto overflow-x-hidden scroll-smooth pb-32">
         
-        {/* TASTO BACK FLUTTUANTE ASSOLUTO */}
+        {/* TASTO BACK ABBASSATO (top-24 / md:top-28) PER NON TOCCARE IL TUO FRAME IN ALTO! */}
         <button
           type="button"
           onClick={(e) => {
@@ -60,7 +56,7 @@ export default function ShowcaseModal({ item, index, onClose }) {
             e.stopPropagation();
             onClose();
           }}
-          className="fixed left-4 top-4 z-[999999] flex cursor-pointer items-center gap-2 rounded-full border border-white/20 bg-black/80 px-4 py-2.5 text-white shadow-2xl backdrop-blur-xl transition-all hover:scale-105 hover:bg-white/10 md:left-8 md:top-8"
+          className="fixed left-4 top-24 z-[999999] flex cursor-pointer items-center gap-2 rounded-full border border-white/20 bg-black/80 px-4 py-2.5 text-white shadow-2xl backdrop-blur-xl transition-all hover:scale-105 hover:bg-white/10 md:left-8 md:top-28"
         >
           <ArrowLeft size={20} />
           <span className="hud-mono mt-0.5 text-xs font-bold uppercase tracking-[0.2em]">
@@ -68,8 +64,8 @@ export default function ShowcaseModal({ item, index, onClose }) {
           </span>
         </button>
 
-        {/* CONTENUTO DELLA PAGINA */}
-        <div className="mx-auto w-full max-w-6xl px-4 pt-28 sm:px-8 sm:pt-32 md:px-12 md:pt-36">
+        {/* CONTENUTO DELLA PAGINA (Aumentato il pt- per spingere tutto più in basso) */}
+        <div className="mx-auto w-full max-w-6xl px-4 pt-40 sm:px-8 sm:pt-48 md:px-12 md:pt-48">
           
           {/* Header Progetto */}
           <div className="mb-12">
