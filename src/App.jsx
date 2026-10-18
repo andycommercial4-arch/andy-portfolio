@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Toaster } from "sonner";
+import { Analytics } from "@vercel/analytics/react";
 import "./App.css";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
@@ -35,6 +36,7 @@ function App() {
         </div>
       </footer>
       <Toaster theme="dark" position="bottom-center" />
+      <Analytics />
     </div>
   );
 }
