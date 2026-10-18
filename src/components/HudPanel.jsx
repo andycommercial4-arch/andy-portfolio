@@ -12,7 +12,7 @@ const INITIAL_REVIEWS = [
 ];
 
 // ============================================================================
-// FILTRO ANTI-TROLL (Aggiungi qui tutte le parole che vuoi censurare)
+// FILTRO ANTI-TROLL
 // ============================================================================
 const BAD_WORDS = [
   "fuck", "shit", "bitch", "asshole", "cunt", "dick", "pussy", // EN
@@ -21,11 +21,9 @@ const BAD_WORDS = [
   "kurwa", "blyat", "cyka" // Altre
 ];
 
-// Funzione che censura le parole volgari sostituendole con ***
 const censorText = (text) => {
   let censored = text;
   BAD_WORDS.forEach((word) => {
-    // Il regex cerca la parola esatta, ignorando maiuscole/minuscole
     const regex = new RegExp(`\\b${word}\\b`, "gi");
     censored = censored.replace(regex, "***");
   });
@@ -36,20 +34,17 @@ export default function HudPanel() {
   const ref = useRef(null);
   const [isHovered, setIsHovered] = useState(false);
   
-  // STATI DEL SISTEMA RECENSIONI
   const [showReviews, setShowReviews] = useState(false);
   const [reviews, setReviews] = useState(INITIAL_REVIEWS);
   
-  // STATI DEL FORM
   const [newReview, setNewReview] = useState({ name: "", text: "", rating: 5 });
   const [hoverStar, setHoverStar] = useState(0);
 
-  // Molle per l'effetto 3D (TILT) ultra-fluido
   const rx = useSpring(0, { stiffness: 100, damping: 20 });
   const ry = useSpring(0, { stiffness: 100, damping: 20 });
 
   const onMove = (e) => {
-    if (showReviews) return; // Blocca il tilt se la modale è aperta
+    if (showReviews) return; 
     const r = ref.current?.getBoundingClientRect();
     if (!r) return;
     ry.set(((e.clientX - r.left) / r.width - 0.5) * 15);
@@ -62,12 +57,10 @@ export default function HudPanel() {
     ry.set(0);
   };
 
-  // AGGIUNGI RECENSIONE CON CENSURA
   const handleSubmitReview = (e) => {
     e.preventDefault();
     if (!newReview.name || !newReview.text) return;
     
-    // Applica il filtro anti-troll prima di salvare!
     const safeName = censorText(newReview.name);
     const safeText = censorText(newReview.text);
 
@@ -78,17 +71,17 @@ export default function HudPanel() {
       text: safeText
     };
     
-    setReviews([review, ...reviews]); // Aggiunge in cima (spariscono se ricarica la pagina)
-    setNewReview({ name: "", text: "", rating: 5 }); // Resetta form
+    setReviews([review, ...reviews]);
+    setNewReview({ name: "", text: "", rating: 5 });
   };
 
   return (
     <>
-      {/* ================= MODALE RECENSIONI GIGANTE (HALL OF FAME) ================= */}
+      {/* ================= MODALE RECENSIONI (HALL OF FAME) ================= */}
       <AnimatePresence>
         {showReviews && (
           <motion.div
-            className="fixed inset-0 z-[999999] flex items-center justify-center overflow-hidden p-4 sm:p-6"
+            className="fixed inset-0 z-[999999] flex items-center justify-center p-4 sm:p-6"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0, transition: { duration: 0.3 } }}
@@ -97,103 +90,106 @@ export default function HudPanel() {
             <div className="absolute inset-0 bg-[#05080F]/90 backdrop-blur-xl" />
             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay pointer-events-none" />
 
-            {/* CONTENITORE GIGANTE AUTOSCALANTE (w-[95vw] max-w-7xl h-[90vh]) */}
+            {/* CONTENITORE GIGANTE RESPONSIVE BLINDATO */}
             <motion.div 
-              className="relative z-10 flex w-[95vw] max-w-7xl flex-col overflow-hidden rounded-[2rem] border border-[#FFB800]/20 bg-[#0A0F1A]/90 shadow-[0_0_80px_rgba(0,0,0,0.8)] md:flex-row h-[90vh] max-h-[900px]"
+              className="relative z-10 flex w-full max-w-6xl flex-col overflow-hidden rounded-[1.5rem] sm:rounded-[2rem] border border-[#FFB800]/20 bg-[#0A0F1A]/95 shadow-[0_0_80px_rgba(0,0,0,0.8)] h-[90vh] lg:h-[85vh]"
               initial={{ opacity: 0, y: 50, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
             >
-              {/* Bottone Chiudi Assoluto */}
-              <button onClick={() => setShowReviews(false)} className="absolute right-6 top-6 z-50 rounded-full bg-black/50 p-3 text-slate-400 transition-all hover:scale-110 hover:bg-red-500/20 hover:text-red-500 backdrop-blur-md border border-white/10">
-                <X size={24} />
+              {/* Bottone Chiudi Assoluto IN CIMA */}
+              <button 
+                onClick={() => setShowReviews(false)} 
+                className="absolute right-4 top-4 z-[9999] rounded-full bg-black/80 p-2 sm:p-3 text-slate-300 transition-all hover:scale-110 hover:bg-red-500 hover:text-white backdrop-blur-md border border-white/10"
+              >
+                <X size={20} />
               </button>
 
-              {/* LATO SINISTRO: Scrivi una recensione */}
-              <div className="flex w-full flex-col border-b border-white/10 bg-black/40 p-8 md:w-[45%] lg:w-[40%] md:border-b-0 md:border-r md:p-10 lg:p-12">
-                <div className="mb-8">
-                  <h3 className="font-display text-3xl font-black uppercase text-white drop-shadow-md sm:text-4xl">LEAVE A <span className="text-[#FFB800]">REVIEW</span></h3>
-                  <p className="hud-mono mt-2 text-xs tracking-[0.2em] text-slate-400">RATE MY UI DESIGN SERVICES</p>
-                </div>
-
-                <form onSubmit={handleSubmitReview} className="flex flex-1 flex-col gap-5 lg:gap-6">
-                  {/* Selettore Stelle */}
-                  <div className="flex flex-col items-center justify-center rounded-2xl border border-white/5 bg-white/5 py-6">
-                    <span className="hud-mono mb-3 text-[11px] uppercase tracking-widest text-slate-400">SELECT RATING</span>
-                    <div className="flex gap-2 sm:gap-3">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <button
-                          key={star}
-                          type="button"
-                          onMouseEnter={() => setHoverStar(star)}
-                          onMouseLeave={() => setHoverStar(0)}
-                          onClick={() => setNewReview({ ...newReview, rating: star })}
-                          className="transition-transform hover:scale-125 focus:outline-none"
-                        >
-                          <Star 
-                            size={36} 
-                            className={`transition-colors duration-200 ${(hoverStar || newReview.rating) >= star ? "fill-[#FFB800] text-[#FFB800] drop-shadow-[0_0_15px_rgba(255,184,0,0.6)]" : "fill-transparent text-slate-600"}`} 
-                          />
-                        </button>
-                      ))}
-                    </div>
+              {/* STRUTTURA FLESSIBILE (Scrolla interamente su Mobile, si divide su Desktop) */}
+              <div className="flex flex-col lg:flex-row h-full w-full overflow-y-auto lg:overflow-hidden">
+                
+                {/* LATO SINISTRO: Scrivi una recensione */}
+                <div className="w-full lg:w-[40%] shrink-0 flex flex-col border-b lg:border-b-0 lg:border-r border-white/10 bg-black/40 p-6 sm:p-8 lg:p-10 lg:overflow-y-auto">
+                  <div className="mb-6 sm:mb-8 pr-12">
+                    <h3 className="font-display text-2xl sm:text-3xl font-black uppercase text-white drop-shadow-md">LEAVE A <span className="text-[#FFB800]">REVIEW</span></h3>
+                    <p className="hud-mono mt-2 text-[10px] sm:text-xs tracking-[0.2em] text-slate-400">RATE MY UI DESIGN SERVICES</p>
                   </div>
 
-                  {/* Input Nome */}
-                  <input type="text" required value={newReview.name} onChange={(e) => setNewReview({ ...newReview, name: e.target.value })} placeholder="Your Name or Studio" maxLength={30} className="w-full rounded-2xl border border-white/10 bg-black/40 py-4 px-5 text-base text-white placeholder-slate-500 outline-none transition-all focus:border-[#FFB800] focus:bg-white/5 focus:shadow-[0_0_20px_rgba(255,184,0,0.15)]" />
-                  
-                  {/* Testo Recensione */}
-                  <textarea required value={newReview.text} onChange={(e) => setNewReview({ ...newReview, text: e.target.value })} placeholder="Describe your experience..." maxLength={250} rows={5} className="w-full resize-none rounded-2xl border border-white/10 bg-black/40 py-4 px-5 text-base text-white placeholder-slate-500 outline-none transition-all focus:border-[#FFB800] focus:bg-white/5 focus:shadow-[0_0_20px_rgba(255,184,0,0.15)]" />
+                  <form onSubmit={handleSubmitReview} className="flex flex-1 flex-col gap-4 sm:gap-6">
+                    {/* Selettore Stelle */}
+                    <div className="flex flex-col items-center justify-center rounded-2xl border border-white/5 bg-white/5 py-4 sm:py-6">
+                      <span className="hud-mono mb-2 text-[10px] sm:text-[11px] uppercase tracking-widest text-slate-400">SELECT RATING</span>
+                      <div className="flex gap-2 sm:gap-3">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <button
+                            key={star}
+                            type="button"
+                            onMouseEnter={() => setHoverStar(star)}
+                            onMouseLeave={() => setHoverStar(0)}
+                            onClick={() => setNewReview({ ...newReview, rating: star })}
+                            className="transition-transform hover:scale-125 focus:outline-none"
+                          >
+                            <Star 
+                              size={30} 
+                              className={`transition-colors duration-200 sm:w-9 sm:h-9 ${(hoverStar || newReview.rating) >= star ? "fill-[#FFB800] text-[#FFB800] drop-shadow-[0_0_15px_rgba(255,184,0,0.6)]" : "fill-transparent text-slate-600"}`} 
+                            />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
 
-                  {/* Submit Button */}
-                  <button type="submit" className="group relative mt-auto flex w-full items-center justify-center gap-3 overflow-hidden rounded-2xl bg-[#FFB800] py-4 shadow-[0_0_25px_rgba(255,184,0,0.3)] transition-all hover:scale-[1.02] hover:shadow-[0_0_40px_rgba(255,184,0,0.5)]">
-                    <span className="font-display text-lg font-black uppercase tracking-widest text-black">SUBMIT REVIEW</span>
-                    <Send size={20} className="text-black transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
-                  </button>
-                </form>
-              </div>
+                    <input type="text" required value={newReview.name} onChange={(e) => setNewReview({ ...newReview, name: e.target.value })} placeholder="Your Name or Studio" maxLength={30} className="w-full rounded-2xl border border-white/10 bg-black/40 py-3 sm:py-4 px-4 sm:px-5 text-sm sm:text-base text-white placeholder-slate-500 outline-none transition-all focus:border-[#FFB800] focus:bg-white/5 focus:shadow-[0_0_20px_rgba(255,184,0,0.15)]" />
+                    
+                    <textarea required value={newReview.text} onChange={(e) => setNewReview({ ...newReview, text: e.target.value })} placeholder="Describe your experience..." maxLength={250} rows={4} className="w-full resize-none rounded-2xl border border-white/10 bg-black/40 py-3 sm:py-4 px-4 sm:px-5 text-sm sm:text-base text-white placeholder-slate-500 outline-none transition-all focus:border-[#FFB800] focus:bg-white/5 focus:shadow-[0_0_20px_rgba(255,184,0,0.15)]" />
 
-              {/* LATO DESTRO: Lista Recensioni */}
-              <div className="flex w-full flex-col bg-transparent md:w-[55%] lg:w-[60%] overflow-hidden relative">
-                {/* Glow decorativo Gigante */}
-                <div className="absolute -right-32 -top-32 h-[500px] w-[500px] rounded-full bg-[#FFB800] opacity-10 blur-[120px] pointer-events-none" />
-                
-                <div className="border-b border-white/10 p-8 lg:p-10 pb-6 relative z-10">
-                  <h3 className="font-display text-2xl sm:text-3xl font-bold uppercase text-white flex items-center gap-3">
-                    <Star size={28} className="text-[#FFB800] fill-[#FFB800] drop-shadow-[0_0_10px_rgba(255,184,0,0.5)]" /> 
-                    HALL OF FAME
-                  </h3>
+                    <button type="submit" className="group relative mt-2 sm:mt-auto flex w-full items-center justify-center gap-3 overflow-hidden rounded-2xl bg-[#FFB800] py-3.5 sm:py-4 shadow-[0_0_25px_rgba(255,184,0,0.3)] transition-all hover:scale-[1.02] hover:shadow-[0_0_40px_rgba(255,184,0,0.5)]">
+                      <span className="font-display text-base sm:text-lg font-black uppercase tracking-widest text-black">SUBMIT REVIEW</span>
+                      <Send size={18} className="text-black transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
+                    </button>
+                  </form>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-8 lg:p-10 pt-4 space-y-5 relative z-10 custom-scrollbar">
-                  {reviews.length === 0 ? (
-                    <div className="flex h-full flex-col items-center justify-center text-slate-500 opacity-50">
-                      <Star size={60} className="mb-4" />
-                      <p className="font-mono text-sm tracking-widest">NO REVIEWS YET</p>
-                    </div>
-                  ) : (
-                    <AnimatePresence>
-                      {reviews.map((rev) => (
-                        <motion.div 
-                          key={rev.id}
-                          initial={{ opacity: 0, x: 20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, scale: 0.9 }}
-                          className="group relative rounded-2xl border border-white/5 bg-white/[0.03] p-6 sm:p-8 shadow-sm backdrop-blur-sm transition-colors hover:bg-white/[0.06]"
-                        >
-                          <div className="mb-4 flex items-center justify-between">
-                            <span className="font-display text-lg sm:text-xl font-bold text-white">{rev.name}</span>
-                            <div className="flex gap-1">
-                              {[...Array(5)].map((_, i) => (
-                                <Star key={i} size={16} className={i < rev.rating ? "fill-[#FFB800] text-[#FFB800]" : "fill-transparent text-slate-600"} />
-                              ))}
+                {/* LATO DESTRO: Lista Recensioni */}
+                <div className="w-full lg:w-[60%] flex flex-col relative min-h-[400px] lg:min-h-0 lg:overflow-hidden">
+                  <div className="absolute -right-32 -top-32 h-[300px] w-[300px] sm:h-[500px] sm:w-[500px] rounded-full bg-[#FFB800] opacity-10 blur-[80px] pointer-events-none" />
+                  
+                  <div className="border-b border-white/10 p-6 sm:p-8 lg:p-10 pb-4 relative z-10">
+                    <h3 className="font-display text-xl sm:text-2xl lg:text-3xl font-bold uppercase text-white flex items-center gap-3">
+                      <Star size={24} className="text-[#FFB800] fill-[#FFB800] drop-shadow-[0_0_10px_rgba(255,184,0,0.5)]" /> 
+                      HALL OF FAME
+                    </h3>
+                  </div>
+
+                  <div className="flex-1 lg:overflow-y-auto p-6 sm:p-8 lg:p-10 pt-4 space-y-4 sm:space-y-5 relative z-10 custom-scrollbar">
+                    {reviews.length === 0 ? (
+                      <div className="flex h-full flex-col items-center justify-center text-slate-500 opacity-50 py-10">
+                        <Star size={50} className="mb-4" />
+                        <p className="font-mono text-xs sm:text-sm tracking-widest">NO REVIEWS YET</p>
+                      </div>
+                    ) : (
+                      <AnimatePresence>
+                        {reviews.map((rev) => (
+                          <motion.div 
+                            key={rev.id}
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            className="group relative rounded-2xl border border-white/5 bg-white/[0.03] p-5 sm:p-6 lg:p-8 shadow-sm backdrop-blur-sm transition-colors hover:bg-white/[0.06]"
+                          >
+                            <div className="mb-3 sm:mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                              <span className="font-display text-base sm:text-lg lg:text-xl font-bold text-white">{rev.name}</span>
+                              <div className="flex gap-1">
+                                {[...Array(5)].map((_, i) => (
+                                  <Star key={i} size={14} className={i < rev.rating ? "fill-[#FFB800] text-[#FFB800]" : "fill-transparent text-slate-600"} />
+                                ))}
+                              </div>
                             </div>
-                          </div>
-                          <p className="text-base leading-relaxed text-slate-300 sm:text-lg">"{rev.text}"</p>
-                        </motion.div>
-                      ))}
-                    </AnimatePresence>
-                  )}
+                            <p className="text-sm sm:text-base leading-relaxed text-slate-300">"{rev.text}"</p>
+                          </motion.div>
+                        ))}
+                      </AnimatePresence>
+                    )}
+                  </div>
                 </div>
               </div>
             </motion.div>
