@@ -1,22 +1,32 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState } from "react";
 import { motion, useSpring, AnimatePresence } from "framer-motion";
-import { Crown, Sparkles, Users, Star, Gamepad2, ChevronRight, Check, X, User, MessageSquare, AtSign, Send } from "lucide-react";
+import { Crown, Sparkles, Users, Star, Gamepad2, ChevronRight, X, Send, Trash2, ShieldAlert } from "lucide-react";
+
+// Dati iniziali finti per far vedere che sei già un boss
+const INITIAL_REVIEWS = [
+  { id: 1, name: "NeonRider Studio", rating: 5, text: "Andy is a beast. Our game's retention doubled after his UI overhaul. Worth every Robux." },
+  { id: 2, name: "Pixel_Queen", rating: 5, text: "Fast, clean, and extremely professional. The animations are so buttery smooth!" }
+];
 
 export default function HudPanel() {
   const ref = useRef(null);
   const [isHovered, setIsHovered] = useState(false);
   
+  // STATI DEL SISTEMA RECENSIONI
+  const [showReviews, setShowReviews] = useState(false);
+  const [reviews, setReviews] = useState(INITIAL_REVIEWS);
+  const [isAdmin, setIsAdmin] = useState(false); // IL SEGRETO
+  
   // STATI DEL FORM
-  const [formState, setFormState] = useState("closed"); // "closed", "flash", "form", "transmitting"
-  const [reqType, setReqType] = useState("HIRE"); // "HIRE" o "QUESTION"
-  const [formData, setFormData] = useState({ name: "", discord: "", message: "" });
+  const [newReview, setNewReview] = useState({ name: "", text: "", rating: 5 });
+  const [hoverStar, setHoverStar] = useState(0);
 
-  // Molle per l'effetto 3D (TILT) ultra-fluido della card
+  // Molle per l'effetto 3D (TILT) ultra-fluido
   const rx = useSpring(0, { stiffness: 100, damping: 20 });
   const ry = useSpring(0, { stiffness: 100, damping: 20 });
 
   const onMove = (e) => {
-    if (formState !== "closed") return; // Disabilita il tilt se il form è aperto
+    if (showReviews) return; // Blocca il tilt se la modale è aperta
     const r = ref.current?.getBoundingClientRect();
     if (!r) return;
     ry.set(((e.clientX - r.left) / r.width - 0.5) * 15);
@@ -29,161 +39,151 @@ export default function HudPanel() {
     ry.set(0);
   };
 
-  // SEQUENZA DI APERTURA
-  const handleHireClick = () => {
-    if (formState !== "closed") return;
-    setFormState("flash");
-    setTimeout(() => {
-      setFormState("form");
-    }, 2000); // Dopo 2s di animazione flash, apre il form
+  // AGGIUNGI RECENSIONE
+  const handleSubmitReview = (e) => {
+    e.preventDefault();
+    if (!newReview.name || !newReview.text) return;
+    
+    const review = {
+      id: Date.now(),
+      name: newReview.name,
+      rating: newReview.rating,
+      text: newReview.text
+    };
+    
+    setReviews([review, ...reviews]); // Aggiunge in cima
+    setNewReview({ name: "", text: "", rating: 5 }); // Resetta form
   };
 
-  // INVIO MESSAGGIO
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!formData.name || !formData.discord || !formData.message) return;
-
-    setFormState("transmitting");
-
-    // Formatta l'email
-    const subject = encodeURIComponent(`[${reqType === "HIRE" ? "Hire Request" : "Question"}] from ${formData.name}`);
-    const body = encodeURIComponent(
-      `CLIENT DETAILS:\n-----------------\nName: ${formData.name}\nDiscord: ${formData.discord}\n\nMESSAGE:\n-----------------\n${formData.message}`
-    );
-
-    // Simula trasmissione hacker e poi apre Mailto
-    setTimeout(() => {
-      window.location.href = `mailto:andycommercial4@gmail.com?subject=${subject}&body=${body}`;
-      setFormState("closed");
-      setFormData({ name: "", discord: "", message: "" });
-    }, 2500);
+  // ELIMINA RECENSIONE (Solo in Admin Mode)
+  const handleDelete = (id) => {
+    setReviews(reviews.filter(r => r.id !== id));
   };
 
   return (
     <>
-      {/* ================= TERMINALE OLOGRAFICO (FORM MODAL) ================= */}
+      {/* ================= MODALE RECENSIONI (HALL OF FAME) ================= */}
       <AnimatePresence>
-        {formState !== "closed" && (
+        {showReviews && (
           <motion.div
             className="fixed inset-0 z-[999999] flex items-center justify-center overflow-hidden p-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0, transition: { duration: 0.5 } }}
+            exit={{ opacity: 0, transition: { duration: 0.3 } }}
           >
             {/* Sfondo scuro blurrato globale */}
             <div className="absolute inset-0 bg-[#05080F]/90 backdrop-blur-xl" />
             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay pointer-events-none" />
 
-            {/* --- FASE 1: FLASH INIZIALE --- */}
-            {formState === "flash" && (
-              <>
-                <motion.div className="absolute inset-0 bg-white" initial={{ opacity: 1 }} animate={{ opacity: 0 }} transition={{ duration: 0.5 }} />
-                <motion.div className="absolute left-0 right-0 h-1 bg-[#FFB800] shadow-[0_0_30px_#FFB800]" initial={{ top: "-10%" }} animate={{ top: "110%" }} transition={{ duration: 1.5, ease: "linear" }} />
-                <motion.div className="relative z-10 text-center" initial={{ scale: 0.8, opacity: 0, filter: "blur(10px)" }} animate={{ scale: 1, opacity: 1, filter: "blur(0px)" }} transition={{ type: "spring", stiffness: 200, damping: 20 }}>
-                  <div className="mb-4 flex justify-center">
-                    <div className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-[#FFB800] bg-[#FFB800]/20 shadow-[0_0_50px_rgba(255,184,0,0.5)]">
-                      <Check size={40} className="text-[#FFB800]" />
-                    </div>
-                  </div>
-                  <h2 className="font-display text-4xl font-black uppercase tracking-widest text-white sm:text-6xl drop-shadow-[0_0_20px_rgba(255,255,255,0.5)]">
-                    UPLINK <span className="text-[#FFB800]">ESTABLISHED</span>
-                  </h2>
-                </motion.div>
-              </>
-            )}
+            <motion.div 
+              className="relative z-10 flex w-full max-w-4xl flex-col overflow-hidden rounded-[2rem] border border-[#FFB800]/20 bg-[#0A0F1A]/90 shadow-[0_0_50px_rgba(0,0,0,0.8)] md:flex-row h-[80vh] md:h-[600px]"
+              initial={{ opacity: 0, y: 50, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            >
+              {/* Bottone Chiudi Assoluto */}
+              <button onClick={() => setShowReviews(false)} className="absolute right-4 top-4 z-50 rounded-full bg-black/50 p-2 text-slate-400 transition-colors hover:bg-red-500/20 hover:text-red-500 backdrop-blur-md">
+                <X size={20} />
+              </button>
 
-            {/* --- FASE 2: IL FORM VERO E PROPRIO --- */}
-            {formState === "form" && (
-              <motion.div 
-                className="relative z-10 w-full max-w-lg overflow-hidden rounded-[2rem] border border-white/10 bg-[#0A0F1A]/80 shadow-[0_0_50px_rgba(0,0,0,0.8)] backdrop-blur-2xl"
-                initial={{ opacity: 0, y: 50, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ type: "spring", stiffness: 300, damping: 25 }}
-              >
-                {/* Glow decorativo interno */}
-                <div className={`absolute -top-32 -left-32 h-64 w-64 rounded-full blur-[80px] opacity-30 transition-colors duration-500 ${reqType === "HIRE" ? "bg-[#FFB800]" : "bg-[#4FD1FF]"}`} />
-
-                {/* Header Form */}
-                <div className="flex items-center justify-between border-b border-white/10 p-6 relative z-10">
-                  <div className="flex items-center gap-3">
-                    <div className={`flex h-8 w-8 items-center justify-center rounded-full border ${reqType === "HIRE" ? "border-[#FFB800]/50 bg-[#FFB800]/20 text-[#FFB800]" : "border-[#4FD1FF]/50 bg-[#4FD1FF]/20 text-[#4FD1FF]"}`}>
-                      <Send size={14} />
-                    </div>
-                    <div>
-                      <h3 className="font-display text-lg font-bold text-white tracking-widest">SECURE_COMMS</h3>
-                      <p className="hud-mono text-[9px] tracking-[0.2em] text-slate-400">ENCRYPTED CHANNEL TO ANDYDEV</p>
-                    </div>
-                  </div>
-                  <button onClick={() => setFormState("closed")} className="rounded-full bg-white/5 p-2 text-slate-400 transition-colors hover:bg-red-500/20 hover:text-red-500">
-                    <X size={18} />
-                  </button>
+              {/* LATO SINISTRO: Scrivi una recensione */}
+              <div className="flex w-full flex-col border-b border-white/10 bg-black/40 p-6 md:w-1/2 md:border-b-0 md:border-r md:p-8">
+                <div className="mb-6">
+                  <h3 className="font-display text-2xl font-black uppercase text-white drop-shadow-md">LEAVE A <span className="text-[#FFB800]">REVIEW</span></h3>
+                  <p className="hud-mono text-[10px] tracking-[0.2em] text-slate-400">RATE MY UI DESIGN SERVICES</p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="p-6 relative z-10">
-                  {/* Selettore HIRE / QUESTION */}
-                  <div className="mb-6 flex rounded-xl border border-white/10 bg-black/40 p-1">
-                    <button type="button" onClick={() => setReqType("HIRE")} className={`flex-1 rounded-lg py-2 transition-all duration-300 ${reqType === "HIRE" ? "bg-[#FFB800] text-black shadow-[0_0_15px_rgba(255,184,0,0.4)]" : "text-slate-400 hover:text-white"}`}>
-                      <span className="font-display text-sm font-bold uppercase tracking-widest">HIRE REQUEST</span>
-                    </button>
-                    <button type="button" onClick={() => setReqType("QUESTION")} className={`flex-1 rounded-lg py-2 transition-all duration-300 ${reqType === "QUESTION" ? "bg-[#4FD1FF] text-black shadow-[0_0_15px_rgba(79,209,255,0.4)]" : "text-slate-400 hover:text-white"}`}>
-                      <span className="font-display text-sm font-bold uppercase tracking-widest">QUESTION</span>
-                    </button>
-                  </div>
-
-                  <div className="space-y-4">
-                    {/* Campo Nome */}
-                    <div className="relative">
-                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-                        <User size={16} className="text-slate-500" />
-                      </div>
-                      <input type="text" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="Your Name / Studio" className="w-full rounded-xl border border-white/10 bg-black/40 py-3 pl-11 pr-4 text-sm text-white placeholder-slate-500 outline-none transition-all focus:border-[#FFB800] focus:bg-white/5 focus:shadow-[0_0_15px_rgba(255,184,0,0.1)]" />
-                    </div>
-
-                    {/* Campo Discord (OBBLIGATORIO) */}
-                    <div className="relative">
-                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-                        <AtSign size={16} className="text-[#5865F2]" />
-                      </div>
-                      <input type="text" required value={formData.discord} onChange={(e) => setFormData({ ...formData, discord: e.target.value })} placeholder="Discord Username (Required)" className="w-full rounded-xl border border-white/10 bg-black/40 py-3 pl-11 pr-4 text-sm text-white placeholder-slate-500 outline-none transition-all focus:border-[#5865F2] focus:bg-white/5 focus:shadow-[0_0_15px_rgba(88,101,242,0.2)]" />
-                    </div>
-
-                    {/* Campo Messaggio */}
-                    <div className="relative">
-                      <div className="pointer-events-none absolute top-3 left-0 flex items-center pl-4">
-                        <MessageSquare size={16} className="text-slate-500" />
-                      </div>
-                      <textarea required value={formData.message} onChange={(e) => setFormData({ ...formData, message: e.target.value })} placeholder="Describe your project or ask a question..." rows={4} className="w-full resize-none rounded-xl border border-white/10 bg-black/40 py-3 pl-11 pr-4 text-sm text-white placeholder-slate-500 outline-none transition-all focus:border-[#FFB800] focus:bg-white/5 focus:shadow-[0_0_15px_rgba(255,184,0,0.1)]" />
+                <form onSubmit={handleSubmitReview} className="flex flex-1 flex-col gap-4">
+                  {/* Selettore Stelle */}
+                  <div className="flex flex-col items-center justify-center rounded-xl border border-white/5 bg-white/5 py-4">
+                    <span className="hud-mono mb-2 text-[10px] uppercase tracking-widest text-slate-400">RATING</span>
+                    <div className="flex gap-2">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          type="button"
+                          onMouseEnter={() => setHoverStar(star)}
+                          onMouseLeave={() => setHoverStar(0)}
+                          onClick={() => setNewReview({ ...newReview, rating: star })}
+                          className="transition-transform hover:scale-125"
+                        >
+                          <Star 
+                            size={28} 
+                            className={`transition-colors duration-200 ${(hoverStar || newReview.rating) >= star ? "fill-[#FFB800] text-[#FFB800] drop-shadow-[0_0_10px_rgba(255,184,0,0.5)]" : "fill-transparent text-slate-600"}`} 
+                          />
+                        </button>
+                      ))}
                     </div>
                   </div>
 
-                  <button type="submit" className={`group relative mt-6 flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl py-4 transition-all duration-300 ${reqType === "HIRE" ? "bg-[#FFB800] text-black shadow-[0_0_20px_rgba(255,184,0,0.3)] hover:shadow-[0_0_35px_rgba(255,184,0,0.5)]" : "bg-[#4FD1FF] text-black shadow-[0_0_20px_rgba(79,209,255,0.3)] hover:shadow-[0_0_35px_rgba(79,209,255,0.5)]"}`}>
-                    <span className="font-display text-base font-black uppercase tracking-widest">TRANSMIT MESSAGE</span>
-                    <ChevronRight size={20} className="transition-transform group-hover:translate-x-1" />
+                  {/* Input Nome */}
+                  <input type="text" required value={newReview.name} onChange={(e) => setNewReview({ ...newReview, name: e.target.value })} placeholder="Your Name or Studio" maxLength={20} className="w-full rounded-xl border border-white/10 bg-black/40 py-3 px-4 text-sm text-white placeholder-slate-500 outline-none transition-all focus:border-[#FFB800] focus:bg-white/5 focus:shadow-[0_0_15px_rgba(255,184,0,0.1)]" />
+                  
+                  {/* Testo Recensione */}
+                  <textarea required value={newReview.text} onChange={(e) => setNewReview({ ...newReview, text: e.target.value })} placeholder="How was the UI?" maxLength={150} rows={3} className="w-full resize-none rounded-xl border border-white/10 bg-black/40 py-3 px-4 text-sm text-white placeholder-slate-500 outline-none transition-all focus:border-[#FFB800] focus:bg-white/5 focus:shadow-[0_0_15px_rgba(255,184,0,0.1)]" />
+
+                  {/* Submit Button */}
+                  <button type="submit" className="group relative mt-auto flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-[#FFB800] py-3.5 shadow-[0_0_20px_rgba(255,184,0,0.3)] transition-all hover:shadow-[0_0_35px_rgba(255,184,0,0.5)]">
+                    <span className="font-display text-sm font-black uppercase tracking-widest text-black">SUBMIT REVIEW</span>
+                    <Send size={16} className="text-black transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
                   </button>
                 </form>
-              </motion.div>
-            )}
+              </div>
 
-            {/* --- FASE 3: TRASMISSIONE IN CORSO --- */}
-            {formState === "transmitting" && (
-              <motion.div className="relative z-10 text-center" initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}>
-                <div className="mb-6 flex justify-center">
-                  <div className="relative flex h-24 w-24 items-center justify-center rounded-full border-2 border-dashed border-[#FFB800]">
-                    <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: "linear" }} className="absolute inset-0 rounded-full border-2 border-[#FFB800] border-t-transparent" />
-                    <Send size={30} className="text-[#FFB800] animate-pulse" />
-                  </div>
+              {/* LATO DESTRO: Lista Recensioni */}
+              <div className="flex w-full flex-col bg-transparent md:w-1/2 overflow-hidden relative">
+                {/* Glow decorativo */}
+                <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-[#FFB800] opacity-10 blur-[80px]" />
+                
+                <div className="border-b border-white/10 p-6 md:p-8 pb-4">
+                  <h3 className="font-display text-xl font-bold uppercase text-white flex items-center gap-2">
+                    <Star size={18} className="text-[#FFB800] fill-[#FFB800]" /> HALL OF FAME
+                    {isAdmin && <span className="ml-auto flex items-center gap-1 rounded bg-red-500/20 px-2 py-1 text-[9px] font-bold text-red-500"><ShieldAlert size={10}/> ADMIN MODE</span>}
+                  </h3>
                 </div>
-                <h2 className="font-display text-3xl font-black uppercase tracking-widest text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]">
-                  TRANSMITTING...
-                </h2>
-                <p className="hud-mono mt-2 text-xs font-bold tracking-[0.3em] text-[#FFB800]">
-                  OPENING MAIL CLIENT
-                </p>
-                <div className="mx-auto mt-6 h-1 w-48 overflow-hidden rounded-full bg-white/10">
-                  <motion.div className="h-full bg-[#FFB800]" initial={{ width: "0%" }} animate={{ width: "100%" }} transition={{ duration: 2.5, ease: "easeInOut" }} />
+
+                <div className="flex-1 overflow-y-auto p-6 md:p-8 pt-0 space-y-4 relative z-10 custom-scrollbar">
+                  {reviews.length === 0 ? (
+                    <div className="flex h-full flex-col items-center justify-center text-slate-500 opacity-50">
+                      <Star size={40} className="mb-2" />
+                      <p className="font-mono text-xs tracking-widest">NO REVIEWS YET</p>
+                    </div>
+                  ) : (
+                    <AnimatePresence>
+                      {reviews.map((rev) => (
+                        <motion.div 
+                          key={rev.id}
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, scale: 0.9 }}
+                          className="group relative rounded-xl border border-white/5 bg-white/5 p-4 shadow-sm backdrop-blur-sm"
+                        >
+                          <div className="mb-2 flex items-center justify-between">
+                            <span className="font-display text-sm font-bold text-white">{rev.name}</span>
+                            <div className="flex gap-0.5">
+                              {[...Array(5)].map((_, i) => (
+                                <Star key={i} size={12} className={i < rev.rating ? "fill-[#FFB800] text-[#FFB800]" : "fill-transparent text-slate-600"} />
+                              ))}
+                            </div>
+                          </div>
+                          <p className="text-sm leading-relaxed text-slate-300">"{rev.text}"</p>
+                          
+                          {/* CESTINO (Visibile solo in Admin Mode) */}
+                          {isAdmin && (
+                            <button 
+                              onClick={() => handleDelete(rev.id)}
+                              className="absolute -right-2 -top-2 rounded-full bg-red-500 p-1.5 text-white opacity-0 shadow-lg transition-all hover:bg-red-600 group-hover:opacity-100"
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          )}
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                  )}
                 </div>
-              </motion.div>
-            )}
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -218,7 +218,15 @@ export default function HudPanel() {
                 <Sparkles size={14} className="text-[#FFB800] animate-pulse" />
                 <span className="hud-mono text-[10px] font-bold tracking-[0.25em] text-[#FFB800]">ELITE DESIGNER</span>
               </div>
-              <span className="hud-mono text-[11px] font-medium tracking-[0.1em] text-white/40">STATUS: OPEN</span>
+              
+              {/* LA BACKDOOR SEGRETA: DOPPIO CLICK PER DIVENTARE ADMIN E CANCELLARE LE RECENSIONI */}
+              <span 
+                onDoubleClick={() => setIsAdmin(!isAdmin)}
+                className="hud-mono cursor-pointer text-[11px] font-medium tracking-[0.1em] text-white/40 transition-colors hover:text-white/80"
+                title="Double click me..."
+              >
+                STATUS: {isAdmin ? <span className="text-red-500 font-bold">ADMIN</span> : "OPEN"}
+              </span>
             </div>
 
             <div className="relative mb-8 flex h-48 w-full items-center justify-center rounded-2xl border border-white/10 bg-gradient-to-b from-white/5 to-transparent shadow-inner sm:h-56">
@@ -249,7 +257,7 @@ export default function HudPanel() {
             </div>
 
             <motion.button
-              onClick={handleHireClick}
+              onClick={() => setShowReviews(true)}
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-[#FFB800] to-[#FF8A00] py-4 shadow-[0_0_25px_rgba(255,184,0,0.3)] transition-all hover:shadow-[0_0_40px_rgba(255,184,0,0.5)]"
@@ -257,7 +265,7 @@ export default function HudPanel() {
               <div className="absolute inset-0 flex h-full w-full justify-center [transform:skew(-12deg)_translateX(-150%)] group-hover:duration-1000 group-hover:[transform:skew(-12deg)_translateX(150%)]">
                 <div className="relative h-full w-10 bg-white/30" />
               </div>
-              <span className="font-display text-base font-black uppercase tracking-widest text-black">HIRE ME NOW</span>
+              <span className="font-display text-base font-black uppercase tracking-widest text-black">CLIENT REVIEWS</span>
               <ChevronRight size={20} className="text-black transition-transform group-hover:translate-x-1" />
             </motion.button>
 
