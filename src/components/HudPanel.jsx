@@ -1,201 +1,154 @@
-import { useRef, useState, useEffect } from "react";
-import { motion, useSpring } from "framer-motion";
-import { Crosshair, Cpu, Wifi, Zap, Target, ShieldAlert, Cross } from "lucide-react";
-
-const WEAPONS = [
-  { id: "W-01", name: "PLASMA REPEATER", type: "ASSAULT", dmg: "840/s" },
-  { id: "W-02", name: "RAILGUN", type: "SNIPER", dmg: "2400/hit" },
-  { id: "W-03", name: "EMP GRENADE", type: "TACTICAL", dmg: "AOE" },
-];
+import { useRef, useState } from "react";
+import { motion, useSpring, AnimatePresence } from "framer-motion";
+import { Crown, Sparkles, Zap, Shield, Sword, ChevronRight } from "lucide-react";
 
 export default function HudPanel() {
   const ref = useRef(null);
-  const [activeWep, setActiveWep] = useState(0);
-  const [telemetry, setTelemetry] = useState("0x0000");
-
-  // Molle per l'effetto 3D
-  const rx = useSpring(0, { stiffness: 60, damping: 15 });
-  const ry = useSpring(0, { stiffness: 60, damping: 15 });
+  const [isHovered, setIsHovered] = useState(false);
+  
+  // Molle per l'effetto 3D (TILT) ultra-fluido stile Apple TV
+  const rx = useSpring(0, { stiffness: 100, damping: 20 });
+  const ry = useSpring(0, { stiffness: 100, damping: 20 });
 
   const onMove = (e) => {
     const r = ref.current?.getBoundingClientRect();
     if (!r) return;
-    // Calcola la rotazione in base alla posizione del mouse
-    ry.set(((e.clientX - r.left) / r.width - 0.5) * 25);
-    rx.set(-((e.clientY - r.top) / r.height - 0.5) * 20);
+    // Movimento 3D morbidissimo
+    ry.set(((e.clientX - r.left) / r.width - 0.5) * 15);
+    rx.set(-((e.clientY - r.top) / r.height - 0.5) * 15);
   };
-  const reset = () => {
+  
+  const onLeave = () => {
+    setIsHovered(false);
     rx.set(0);
     ry.set(0);
   };
-
-  // Generatore di Telemetria Live (numeri che impazziscono)
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const hex = Math.floor(Math.random() * 16777215).toString(16).toUpperCase().padStart(6, '0');
-      setTelemetry(`0x${hex}`);
-    }, 80);
-    return () => clearInterval(interval);
-  }, []);
 
   return (
     <motion.div
       ref={ref}
       onMouseMove={onMove}
-      onMouseLeave={reset}
-      // perspective e preserve-3d sono il segreto per far "uscire" gli elementi!
-      style={{ rotateX: rx, rotateY: ry, transformPerspective: 1000, transformStyle: "preserve-3d" }}
-      className="relative w-full max-w-[380px] sm:max-w-[420px] aspect-[4/5] sm:aspect-square flex items-center justify-center"
-      data-testid="hero-hud-panel"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={onLeave}
+      style={{ rotateX: rx, rotateY: ry, transformPerspective: 1200 }}
+      className="relative w-full max-w-[340px] sm:max-w-[380px]"
+      data-testid="hero-premium-card"
     >
-      {/* ================= BACKGROUND GLASS LAYER (Livello Base) ================= */}
-      <div 
-        className="absolute inset-4 rounded-[2rem] border border-white/5 bg-[#050B14]/40 backdrop-blur-md shadow-2xl overflow-hidden"
-        style={{ transform: "translateZ(-20px)" }} // Spinto indietro
-      >
-        {/* Griglia Sfondo */}
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay" />
+      {/* ================= BACKGROUND GLOW ================= */}
+      <motion.div 
+        className="absolute -inset-1 rounded-[2.5rem] bg-gradient-to-br from-[#FFB800] via-[#FF3D00] to-[#9D00FF] opacity-30 blur-2xl"
+        animate={{ 
+          scale: isHovered ? 1.05 : 1,
+          opacity: isHovered ? 0.5 : 0.3 
+        }}
+        transition={{ duration: 0.4 }}
+      />
+
+      {/* ================= MAIN CARD GLASS ================= */}
+      <div className="relative rounded-[2rem] border border-white/15 bg-gradient-to-b from-white/[0.08] to-black/60 p-1 shadow-2xl backdrop-blur-2xl">
         
-        {/* Glow Centrale */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200px] h-[200px] rounded-full bg-primary/20 blur-[60px]" />
-      </div>
-
-      {/* ================= RADAR CENTRALE (Livello Medio) ================= */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center pointer-events-none" style={{ transform: "translateZ(20px)" }}>
-        {/* Anello Esterno rotante */}
-        <motion.div 
-          className="absolute w-[240px] h-[240px] rounded-full border border-primary/20 border-t-primary/80 border-b-primary/80"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
-        />
-        {/* Anello Interno rotante inverso */}
-        <motion.div 
-          className="absolute w-[180px] h-[180px] rounded-full border border-dashed border-white/20 border-l-white/60"
-          animate={{ rotate: -360 }}
-          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-        />
-        {/* Mirino */}
-        <Crosshair size={40} className="text-primary/40" />
-      </div>
-
-      {/* ================= WIDGET FLUTTUANTI (Livello Alto - Escono dallo schermo) ================= */}
-      <div className="absolute inset-0 pointer-events-none" style={{ transformStyle: "preserve-3d" }}>
-        
-        {/* TOP LEFT: Status Sistema */}
-        <div className="absolute top-6 left-2 flex flex-col gap-1" style={{ transform: "translateZ(40px)" }}>
-          <div className="flex items-center gap-2 text-primary">
-            <Cpu size={14} />
-            <span className="hud-mono text-[10px] font-bold tracking-[0.3em]">SYS.CORE</span>
-          </div>
-          <div className="h-[2px] w-24 bg-gradient-to-r from-primary to-transparent" />
-          <span className="hud-mono text-[9px] text-white/50 mt-1">NUCLEUS_ONLINE</span>
-        </div>
-
-        {/* TOP RIGHT: Telemetria Live */}
-        <div className="absolute top-6 right-2 flex flex-col items-end gap-1 text-right" style={{ transform: "translateZ(50px)" }}>
-          <div className="flex items-center gap-2 text-[#00E676]">
-            <span className="hud-mono text-[10px] font-bold tracking-[0.2em]">{telemetry}</span>
-            <Wifi size={14} className="animate-pulse" />
-          </div>
-          <div className="h-[2px] w-20 bg-gradient-to-l from-[#00E676] to-transparent" />
-          <span className="hud-mono text-[8px] text-[#00E676]/60 mt-1">UPLINK STABLE</span>
-        </div>
-
-        {/* MIDDLE LEFT: Barre Energia (Angolate) */}
-        <div className="absolute top-1/2 left-0 -translate-y-1/2 flex flex-col gap-3 pl-2" style={{ transform: "translateZ(60px)" }}>
-          {[
-            { label: "SHIELD", val: "88%", color: "#4FD1FF" },
-            { label: "ARMOR", val: "64%", color: "#F5C542" },
-            { label: "POWER", val: "99%", color: "#00E676" },
-          ].map((stat, i) => (
-            <div key={i} className="flex flex-col gap-1">
-              <span className="hud-mono text-[8px] tracking-[0.2em] text-white/60">{stat.label}</span>
-              <div className="flex items-center gap-2">
-                <div className="h-1 w-16 bg-white/10 overflow-hidden skew-x-[-30deg]">
-                  <motion.div 
-                    className="h-full" 
-                    style={{ backgroundColor: stat.color }} 
-                    initial={{ width: 0 }}
-                    animate={{ width: stat.val }}
-                    transition={{ delay: 0.5 + i * 0.2, duration: 1 }}
-                  />
-                </div>
-                <span className="hud-mono text-[9px] font-bold" style={{ color: stat.color }}>{stat.val}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* MIDDLE RIGHT: Target Lock */}
-        <div className="absolute top-1/2 right-2 -translate-y-1/2 flex flex-col items-end gap-2" style={{ transform: "translateZ(60px)" }}>
-          <div className="flex items-center justify-center w-10 h-10 rounded border border-red-500/30 bg-red-500/10">
-            <Target size={20} className="text-red-500 animate-ping" />
-          </div>
-          <span className="hud-mono text-[8px] text-red-400 tracking-[0.2em]">HOSTILE DETECTED</span>
-          <span className="hud-mono text-[10px] font-bold text-red-500">DIST: 142.8m</span>
-        </div>
-
-      </div>
-
-      {/* ================= BOTTOM WEAPON SELECTOR (Livello Altissimo - Interattivo) ================= */}
-      <div 
-        className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[90%] pointer-events-auto" 
-        style={{ transform: "translateZ(80px)" }}
-      >
-        <div className="flex flex-col items-center bg-black/50 backdrop-blur-xl border border-white/10 rounded-xl p-3 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+        {/* Bordo interno di rinforzo */}
+        <div className="relative rounded-[1.75rem] border border-white/5 bg-[#05080F]/40 p-5 sm:p-6 overflow-hidden">
           
-          {/* Info Arma Attiva */}
-          <div className="w-full flex justify-between items-end mb-3 border-b border-white/10 pb-2">
-            <div className="flex flex-col">
-              <span className="hud-mono text-[8px] text-primary tracking-[0.3em]">{WEAPONS[activeWep].type}</span>
-              <motion.span 
-                key={activeWep}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="font-display text-lg font-bold text-white uppercase tracking-tight"
-              >
-                {WEAPONS[activeWep].name}
-              </motion.span>
+          {/* Effetto "Shine" che passa sopra la card */}
+          <motion.div 
+            className="pointer-events-none absolute -inset-full top-0 block h-full w-1/2 -skew-x-12 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+            animate={{ left: ["-100%", "200%"] }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", repeatDelay: 2 }}
+          />
+
+          {/* --- HEADER --- */}
+          <div className="mb-5 flex items-center justify-between">
+            <div className="flex items-center gap-2 rounded-full border border-[#FFB800]/30 bg-[#FFB800]/10 px-3 py-1 backdrop-blur-md">
+              <Sparkles size={12} className="text-[#FFB800]" />
+              <span className="hud-mono text-[9px] font-bold tracking-[0.25em] text-[#FFB800]">MYTHIC DROP</span>
             </div>
-            <div className="flex flex-col items-end">
-              <span className="hud-mono text-[8px] text-white/50 tracking-[0.2em]">OUTPUT</span>
-              <motion.span 
-                key={`dmg-${activeWep}`}
-                initial={{ opacity: 0, y: 5 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="hud-mono text-xs font-bold text-white"
-              >
-                {WEAPONS[activeWep].dmg}
-              </motion.span>
-            </div>
+            <span className="hud-mono text-[10px] font-medium tracking-[0.1em] text-white/40">#001</span>
           </div>
 
-          {/* Selettore Slot */}
-          <div className="flex w-full justify-between gap-2">
-            {WEAPONS.map((wep, i) => {
-              const isActive = i === activeWep;
-              return (
-                <button
-                  key={wep.id}
-                  onClick={() => setActiveWep(i)}
-                  className={`relative flex-1 h-8 flex items-center justify-center rounded transition-all duration-300 overflow-hidden ${
-                    isActive ? "bg-primary text-black" : "bg-white/5 text-white/50 hover:bg-white/10"
-                  }`}
-                >
-                  <span className={`hud-mono text-[10px] font-bold tracking-[0.1em] relative z-10 ${isActive ? 'text-[#05080F]' : ''}`}>
-                    {wep.id}
-                  </span>
-                  {isActive && (
-                    <motion.div 
-                      layoutId="active-wep-bg"
-                      className="absolute inset-0 bg-primary shadow-[0_0_15px_var(--c-primary)]"
-                      transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                    />
-                  )}
-                </button>
-              );
-            })}
+          {/* --- ITEM SHOWCASE (Immagine Centrale) --- */}
+          <div className="relative mb-6 flex h-40 w-full items-center justify-center rounded-2xl border border-white/10 bg-gradient-to-b from-white/5 to-transparent shadow-inner sm:h-48">
+            {/* Luce radiale dietro l'oggetto */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="h-24 w-24 rounded-full bg-[#FFB800] opacity-20 blur-xl" />
+            </div>
+            
+            {/* L'Oggetto che fluttua */}
+            <motion.div
+              animate={{ y: [-5, 5, -5] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              className="relative z-10 text-[#FFB800] drop-shadow-[0_0_25px_rgba(255,184,0,0.6)]"
+            >
+              <Crown size={80} strokeWidth={1.5} />
+            </motion.div>
+
+            {/* Particelle Fluttuanti */}
+            {[...Array(3)].map((_, i) => (
+              <motion.div
+                key={i}
+                className="absolute h-1 w-1 rounded-full bg-white"
+                animate={{
+                  y: [-20, -60],
+                  x: Math.random() * 40 - 20,
+                  opacity: [0, 1, 0],
+                  scale: [0, 1.5, 0]
+                }}
+                transition={{
+                  duration: 2 + Math.random() * 2,
+                  repeat: Infinity,
+                  delay: i * 0.8,
+                  ease: "linear"
+                }}
+                style={{
+                  left: `${40 + i * 10}%`,
+                  bottom: "30%",
+                  boxShadow: "0 0 10px 2px rgba(255, 255, 255, 0.5)"
+                }}
+              />
+            ))}
           </div>
+
+          {/* --- TITLE & SUBTITLE --- */}
+          <div className="mb-6 text-center">
+            <h3 className="font-display text-2xl font-black uppercase tracking-tight text-white sm:text-3xl drop-shadow-md">
+              ASTRAL CROWN
+            </h3>
+            <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#FFB800]">
+              [ Legendary Headpiece ]
+            </p>
+          </div>
+
+          {/* --- STATISTICHE PREDATORIE --- */}
+          <div className="mb-6 grid grid-cols-3 gap-3">
+            {[
+              { icon: Sword, label: "DMG", val: "99", color: "#FF3D00" },
+              { icon: Shield, label: "DEF", val: "85", color: "#4FD1FF" },
+              { icon: Zap, label: "AGI", val: "SS", color: "#FFB800" },
+            ].map((stat, i) => (
+              <div key={i} className="flex flex-col items-center justify-center rounded-xl border border-white/5 bg-black/20 p-2 shadow-inner">
+                <stat.icon size={14} style={{ color: stat.color }} className="mb-1 opacity-80" />
+                <span className="font-display text-lg font-bold text-white leading-none">{stat.val}</span>
+                <span className="hud-mono mt-1 text-[8px] font-bold tracking-widest text-slate-500">{stat.label}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* --- CTA BUTTON (Quello che ti fa venire voglia di comprare) --- */}
+          <motion.button
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-[#FFB800] to-[#FF8A00] py-3.5 shadow-[0_0_20px_rgba(255,184,0,0.3)] transition-all hover:shadow-[0_0_30px_rgba(255,184,0,0.5)]"
+          >
+            {/* Effetto Shine interno al bottone */}
+            <div className="absolute inset-0 flex h-full w-full justify-center [transform:skew(-12deg)_translateX(-150%)] group-hover:duration-1000 group-hover:[transform:skew(-12deg)_translateX(150%)]">
+              <div className="relative h-full w-8 bg-white/30" />
+            </div>
+            
+            <span className="font-display text-sm font-black uppercase tracking-widest text-black sm:text-base">
+              EQUIP NOW
+            </span>
+            <ChevronRight size={18} className="text-black transition-transform group-hover:translate-x-1" />
+          </motion.button>
 
         </div>
       </div>
